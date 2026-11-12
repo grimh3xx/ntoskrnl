@@ -1,0 +1,452 @@
+# Programas instalados pelo winget. Todo id conferido em microsoft/winget-pkgs.
+
+[[app]]
+id = "Valve.Steam"
+name = "Steam"
+category = "games"
+desc = { pt = "A maior loja de jogos de PC.", en = "The biggest PC game store." }
+
+[[app]]
+id = "EpicGames.EpicGamesLauncher"
+name = "Epic Games"
+category = "games"
+desc = { pt = "Fortnite e jogos grátis toda semana.", en = "Fortnite and free games every week." }
+
+[[app]]
+id = "RiotGames.Valorant.BR"
+name = "Valorant"
+category = "games"
+desc = { pt = "Instala o Riot Client com o Valorant (servidor BR).", en = "Installs the Riot Client with Valorant (BR server)." }
+
+[[app]]
+id = "RiotGames.LeagueOfLegends.BR"
+name = "League of Legends"
+category = "games"
+desc = { pt = "Instala o Riot Client com o LoL (servidor BR).", en = "Installs the Riot Client with LoL (BR server)." }
+
+[[app]]
+id = "Blizzard.BattleNet"
+name = "Battle.net"
+category = "games"
+desc = { pt = "Call of Duty, Warcraft, Overwatch e Diablo.", en = "Call of Duty, Warcraft, Overwatch and Diablo." }
+
+[[app]]
+id = "ElectronicArts.EADesktop"
+name = "EA app"
+category = "games"
+desc = { pt = "EA FC, Battlefield, The Sims e Apex.", en = "EA FC, Battlefield, The Sims and Apex." }
+
+[[app]]
+id = "Ubisoft.Connect"
+name = "Ubisoft Connect"
+category = "games"
+desc = { pt = "Assassin's Creed, Rainbow Six e Far Cry.", en = "Assassin's Creed, Rainbow Six and Far Cry." }
+
+[[app]]
+id = "RockstarGames.Launcher"
+name = "Rockstar Games"
+category = "games"
+desc = { pt = "GTA V e Red Dead Redemption 2.", en = "GTA V and Red Dead Redemption 2." }
+
+[[app]]
+id = "GOG.Galaxy"
+name = "GOG Galaxy"
+category = "games"
+desc = { pt = "Jogos sem DRM e junta suas bibliotecas.", en = "DRM-free games and unifies your libraries." }
+
+[[app]]
+id = "Mojang.MinecraftLauncher"
+name = "Minecraft Launcher"
+category = "games"
+desc = { pt = "Launcher oficial do Minecraft.", en = "Official Minecraft launcher." }
+
+[[app]]
+id = "PrismLauncher.PrismLauncher"
+name = "Prism Launcher"
+category = "games"
+desc = { pt = "Minecraft com mods e várias instâncias.", en = "Minecraft with mods and multiple instances." }
+
+[[app]]
+id = "Playnite.Playnite"
+name = "Playnite"
+category = "games"
+desc = { pt = "Todos os seus jogos de todas as lojas num lugar só.", en = "All your games from every store in one place." }
+
+[[app]]
+id = "Guru3D.Afterburner"
+name = "MSI Afterburner"
+category = "pc"
+desc = { pt = "Overlay de FPS e temperatura dentro do jogo.", en = "In-game FPS and temperature overlay." }
+
+[[app]]
+id = "Guru3D.RTSS"
+name = "RivaTuner (RTSS)"
+category = "pc"
+desc = { pt = "Limitador de FPS preciso e overlay.", en = "Precise FPS limiter and overlay." }
+
+[[app]]
+id = "REALiX.HWiNFO"
+name = "HWiNFO"
+category = "pc"
+desc = { pt = "Todos os sensores do PC: temperaturas, clocks e voltagens.", en = "Every PC sensor: temperatures, clocks and voltages." }
+
+[[app]]
+id = "CPUID.CPU-Z"
+name = "CPU-Z"
+category = "pc"
+desc = { pt = "Detalhes do processador, placa-mãe e memória.", en = "Processor, motherboard and memory details." }
+
+[[app]]
+id = "TechPowerUp.GPU-Z"
+name = "GPU-Z"
+category = "pc"
+desc = { pt = "Detalhes da placa de vídeo.", en = "Graphics card details." }
+
+[[app]]
+id = "CrystalDewWorld.CrystalDiskInfo"
+name = "CrystalDiskInfo"
+category = "pc"
+desc = { pt = "Saúde e temperatura do SSD e HD.", en = "SSD and HDD health and temperature." }
+
+[[app]]
+id = "CrystalDewWorld.CrystalDiskMark"
+name = "CrystalDiskMark"
+category = "pc"
+desc = { pt = "Mede a velocidade do SSD e HD.", en = "Measures SSD and HDD speed." }
+
+[[app]]
+id = "Wagnardsoft.DisplayDriverUninstaller"
+name = "DDU"
+category = "pc"
+desc = { pt = "Remove o driver de vídeo por completo antes de reinstalar.", en = "Fully removes the graphics driver before reinstalling." }
+
+[[app]]
+id = "TechPowerUp.NVCleanstall"
+name = "NVCleanstall"
+category = "pc"
+desc = { pt = "Instala o driver NVIDIA sem os extras.", en = "Installs the NVIDIA driver without the extras." }
+
+[[app]]
+id = "Rem0o.FanControl"
+name = "Fan Control"
+category = "pc"
+desc = { pt = "Curvas de ventoinha pelo Windows.", en = "Fan curves from Windows." }
+
+[[app]]
+id = "Resplendence.LatencyMon"
+name = "LatencyMon"
+category = "pc"
+desc = { pt = "Descobre o driver que causa travadinhas e estalos.", en = "Finds the driver behind stutters and audio pops." }
+
+[[app]]
+id = "BitSum.ProcessLasso"
+name = "Process Lasso"
+category = "pc"
+desc = { pt = "Prioridade e núcleos por programa, de forma permanente.", en = "Per-program priority and cores, permanently." }
+
+[[app]]
+id = "Maxon.CinebenchR23"
+name = "Cinebench R23"
+category = "pc"
+desc = { pt = "Teste de desempenho do processador.", en = "Processor benchmark." }
+
+[[app]]
+id = "OCBase.OCCT.Personal"
+name = "OCCT"
+category = "pc"
+desc = { pt = "Teste de estabilidade de CPU, GPU, memória e fonte.", en = "CPU, GPU, memory and PSU stability test." }
+
+[[app]]
+id = "Discord.Discord"
+name = "Discord"
+category = "chat"
+desc = { pt = "Voz e chat para jogar em grupo.", en = "Voice and chat for playing together." }
+
+[[app]]
+id = "9NKSQGP7F2NH"
+name = "WhatsApp"
+category = "chat"
+desc = { pt = "WhatsApp para PC (Microsoft Store).", en = "WhatsApp for PC (Microsoft Store)." }
+source = "msstore"
+
+[[app]]
+id = "Telegram.TelegramDesktop"
+name = "Telegram"
+category = "chat"
+desc = { pt = "Mensagens e grupos grandes.", en = "Messaging and large groups." }
+
+[[app]]
+id = "TeamSpeakSystems.TeamSpeakClient"
+name = "TeamSpeak"
+category = "chat"
+desc = { pt = "Voz de baixa latência para times e clãs.", en = "Low-latency voice for teams and clans." }
+
+[[app]]
+id = "Zoom.Zoom"
+name = "Zoom"
+category = "chat"
+desc = { pt = "Chamadas de vídeo.", en = "Video calls." }
+
+[[app]]
+id = "Google.Chrome"
+name = "Google Chrome"
+category = "browser"
+desc = { pt = "O navegador mais usado.", en = "The most used browser." }
+
+[[app]]
+id = "Mozilla.Firefox"
+name = "Firefox"
+category = "browser"
+desc = { pt = "Navegador leve e focado em privacidade.", en = "Light, privacy-focused browser." }
+
+[[app]]
+id = "Brave.Brave"
+name = "Brave"
+category = "browser"
+desc = { pt = "Bloqueia anúncios por padrão.", en = "Blocks ads by default." }
+
+[[app]]
+id = "Opera.OperaGX"
+name = "Opera GX"
+category = "browser"
+desc = { pt = "Navegador gamer com limite de RAM e CPU.", en = "Gamer browser with RAM and CPU limits." }
+
+[[app]]
+id = "Vivaldi.Vivaldi"
+name = "Vivaldi"
+category = "browser"
+desc = { pt = "Navegador personalizável com abas lado a lado.", en = "Customizable browser with side-by-side tabs." }
+
+[[app]]
+id = "OBSProject.OBSStudio"
+name = "OBS Studio"
+category = "creator"
+desc = { pt = "Gravação e live, grátis e completo.", en = "Recording and streaming, free and complete." }
+
+[[app]]
+id = "Streamlabs.Streamlabs"
+name = "Streamlabs"
+category = "creator"
+desc = { pt = "Live com alertas e temas prontos.", en = "Streaming with ready-made alerts and themes." }
+
+[[app]]
+id = "ShareX.ShareX"
+name = "ShareX"
+category = "creator"
+desc = { pt = "Prints e gravação de tela com edição rápida.", en = "Screenshots and screen recording with quick edits." }
+
+[[app]]
+id = "VB-Audio.Voicemeeter.Banana"
+name = "Voicemeeter Banana"
+category = "creator"
+desc = { pt = "Mixer de áudio para live e chamadas.", en = "Audio mixer for streams and calls." }
+
+[[app]]
+id = "Audacity.Audacity"
+name = "Audacity"
+category = "creator"
+desc = { pt = "Editor de áudio.", en = "Audio editor." }
+
+[[app]]
+id = "HandBrake.HandBrake"
+name = "HandBrake"
+category = "creator"
+desc = { pt = "Comprime vídeos sem perder qualidade visível.", en = "Compresses videos without visible quality loss." }
+
+[[app]]
+id = "GIMP.GIMP.3"
+name = "GIMP"
+category = "creator"
+desc = { pt = "Editor de imagens grátis.", en = "Free image editor." }
+
+[[app]]
+id = "KDE.Krita"
+name = "Krita"
+category = "creator"
+desc = { pt = "Desenho e pintura digital.", en = "Digital drawing and painting." }
+
+[[app]]
+id = "BlenderFoundation.Blender"
+name = "Blender"
+category = "creator"
+desc = { pt = "Modelagem 3D e animação.", en = "3D modeling and animation." }
+
+[[app]]
+id = "Spotify.Spotify"
+name = "Spotify"
+category = "media"
+desc = { pt = "Música e podcasts.", en = "Music and podcasts." }
+
+[[app]]
+id = "VideoLAN.VLC"
+name = "VLC"
+category = "media"
+desc = { pt = "Abre qualquer vídeo ou música.", en = "Plays any video or music file." }
+
+[[app]]
+id = "CodecGuide.K-LiteCodecPack.Standard"
+name = "K-Lite Codec Pack"
+category = "media"
+desc = { pt = "Codecs para o Windows abrir qualquer formato de vídeo.", en = "Codecs so Windows can play any video format." }
+
+[[app]]
+id = "Stremio.Stremio"
+name = "Stremio"
+category = "media"
+desc = { pt = "Central de filmes e séries.", en = "Hub for movies and shows." }
+
+[[app]]
+id = "PeterPawlowski.foobar2000"
+name = "foobar2000"
+category = "media"
+desc = { pt = "Player de música leve, ótimo para FLAC.", en = "Lightweight music player, great for FLAC." }
+
+[[app]]
+id = "MPC-BE.MPC-BE"
+name = "MPC-BE"
+category = "media"
+desc = { pt = "Player de vídeo leve, sem anúncios.", en = "Lightweight, ad-free video player." }
+
+[[app]]
+id = "FxSound.FxSound"
+name = "FxSound"
+category = "media"
+desc = { pt = "Melhora o som do PC com equalizador e graves.", en = "Boosts PC sound with an equalizer and bass." }
+
+[[app]]
+id = "7zip.7zip"
+name = "7-Zip"
+category = "tools"
+desc = { pt = "Abre e cria .zip, .rar e .7z.", en = "Opens and creates .zip, .rar and .7z." }
+
+[[app]]
+id = "RARLab.WinRAR"
+name = "WinRAR"
+category = "tools"
+desc = { pt = "Compactador de arquivos.", en = "File archiver." }
+
+[[app]]
+id = "voidtools.Everything"
+name = "Everything"
+category = "tools"
+desc = { pt = "Acha qualquer arquivo do PC na hora.", en = "Finds any file on your PC instantly." }
+
+[[app]]
+id = "AntibodySoftware.WizTree"
+name = "WizTree"
+category = "tools"
+desc = { pt = "Mostra o que está ocupando o disco.", en = "Shows what is filling your disk." }
+
+[[app]]
+id = "RevoUninstaller.RevoUninstaller"
+name = "Revo Uninstaller"
+category = "tools"
+desc = { pt = "Desinstala programas teimosos.", en = "Removes stubborn programs." }
+
+[[app]]
+id = "Microsoft.PowerToys"
+name = "PowerToys"
+category = "tools"
+desc = { pt = "Atalhos e recursos extras da Microsoft para o Windows.", en = "Microsoft's extra shortcuts and features for Windows." }
+
+[[app]]
+id = "Notepad++.Notepad++"
+name = "Notepad++"
+category = "tools"
+desc = { pt = "Editor de texto avançado.", en = "Advanced text editor." }
+
+[[app]]
+id = "Bitwarden.Bitwarden"
+name = "Bitwarden"
+category = "tools"
+desc = { pt = "Gerenciador de senhas grátis.", en = "Free password manager." }
+
+[[app]]
+id = "Malwarebytes.Malwarebytes"
+name = "Malwarebytes"
+category = "tools"
+desc = { pt = "Segunda opinião contra vírus e adware.", en = "Second opinion against malware and adware." }
+
+[[app]]
+id = "AnyDesk.AnyDesk"
+name = "AnyDesk"
+category = "tools"
+desc = { pt = "Acesso remoto: deixa alguém ajudar no seu PC.", en = "Remote access: let someone help on your PC." }
+
+[[app]]
+id = "qBittorrent.qBittorrent"
+name = "qBittorrent"
+category = "tools"
+desc = { pt = "Torrent sem anúncios.", en = "Ad-free torrent client." }
+
+[[app]]
+id = "TheDocumentFoundation.LibreOffice"
+name = "LibreOffice"
+category = "tools"
+desc = { pt = "Word, Excel e PowerPoint grátis.", en = "Free Word, Excel and PowerPoint alternative." }
+
+[[app]]
+id = "Rufus.Rufus"
+name = "Rufus"
+category = "tools"
+desc = { pt = "Cria pendrive para instalar o Windows.", en = "Creates a USB drive to install Windows." }
+
+[[app]]
+id = "Ventoy.Ventoy"
+name = "Ventoy"
+category = "tools"
+desc = { pt = "Pendrive com vários sistemas para dar boot.", en = "USB drive that boots multiple systems." }
+
+[[app]]
+id = "Microsoft.WindowsTerminal"
+name = "Windows Terminal"
+category = "tools"
+desc = { pt = "Terminal moderno com abas para CMD e PowerShell.", en = "Modern tabbed terminal for CMD and PowerShell." }
+
+[[app]]
+id = "Microsoft.VisualStudioCode"
+name = "Visual Studio Code"
+category = "tools"
+desc = { pt = "Editor de código grátis da Microsoft.", en = "Microsoft's free code editor." }
+
+[[app]]
+id = "Git.Git"
+name = "Git"
+category = "tools"
+desc = { pt = "Controle de versão para quem programa.", en = "Version control for developers." }
+
+[[app]]
+id = "Cloudflare.Warp"
+name = "Cloudflare WARP"
+category = "network"
+desc = { pt = "Às vezes melhora a rota até o servidor do jogo.", en = "Sometimes improves the route to the game server." }
+
+[[app]]
+id = "Microsoft.VCRedist.2015+.x64"
+name = "Visual C++ 2015-2022"
+category = "runtime"
+desc = { pt = "Quase todo jogo precisa. Resolve erro de \"DLL faltando\".", en = "Nearly every game needs it. Fixes \"missing DLL\" errors." }
+
+[[app]]
+id = "Microsoft.DirectX"
+name = "DirectX (runtime)"
+category = "runtime"
+desc = { pt = "Bibliotecas do DirectX para jogos mais antigos.", en = "DirectX libraries for older games." }
+
+[[app]]
+id = "Microsoft.DotNet.DesktopRuntime.8"
+name = ".NET Desktop Runtime 8"
+category = "runtime"
+desc = { pt = "Necessário para vários programas e launchers.", en = "Required by many programs and launchers." }
+
+[[app]]
+id = "EclipseAdoptium.Temurin.21.JRE"
+name = "Java 21 (Temurin)"
+category = "runtime"
+desc = { pt = "Java para Minecraft e mods.", en = "Java for Minecraft and mods." }
+
+[[app]]
+id = "Microsoft.XNARedist"
+name = "XNA Framework"
+category = "runtime"
+desc = { pt = "Para jogos indie antigos (Terraria, Stardew antigo).", en = "For older indie games (Terraria, older Stardew)." }

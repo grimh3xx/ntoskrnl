@@ -1,0 +1,52 @@
+# Perfis prontos. Tweaks que não servem para o PC (requisito de GPU, SSD, build, notebook...) são pulados sozinhos.
+
+[[profile]]
+id = "recomendado"
+title = { pt = "Recomendado", en = "Recommended" }
+description = { pt = "Só ajustes seguros: menos telemetria e propaganda, sistema mais leve e proteções básicas ligadas. Bom para qualquer PC.", en = "Safe tweaks only: less telemetry and ads, a lighter system and basic protections on. Good for any PC." }
+tweaks = [
+  "telemetry-off", "ads-off", "web-search-off", "activity-history-off", "lockscreen-tips-off", "tailored-off", "typing-data-off",
+  "widgets-off", "edge-background-off", "error-reporting-off", "delivery-optimization-off", "transparency-off", "responsive-ui",
+  "usb-suspend-off", "game-dvr-off", "windows-game-mode", "sec-firewall", "sec-smb1-off", "sec-autorun-off", "sec-smartscreen",
+]
+
+[[profile]]
+id = "gamer"
+title = { pt = "Gamer", en = "Gamer" }
+description = { pt = "Prioridade para o jogo, menos latência de entrada e de rede e nada rodando à toa em segundo plano.", en = "Game first, lower input and network latency and nothing idling in the background." }
+tweaks = [
+  "game-dvr-off", "windows-game-mode", "mmcss-games", "foreground-priority", "hags-on", "windowed-game-optimizations",
+  "power-throttling-off", "usb-suspend-off", "pcie-aspm-off", "mouse-accel-off", "accessibility-shortcuts-off",
+  "nagle-off", "nic-power-saving-off", "wifi-max-performance", "delivery-optimization-off",
+  "telemetry-off", "ads-off", "widgets-off", "edge-background-off", "background-apps-off", "responsive-ui",
+]
+debloat = ["Microsoft.BingNews", "Microsoft.BingWeather", "Microsoft.Getstarted", "Microsoft.MicrosoftSolitaireCollection", "Clipchamp.Clipchamp"]
+
+[[profile]]
+id = "privacidade"
+title = { pt = "Privacidade", en = "Privacy" }
+description = { pt = "Corta telemetria, anúncios, Bing na busca, histórico de atividades, Copilot e Recall.", en = "Cuts telemetry, ads, Bing in search, activity history, Copilot and Recall." }
+tweaks = [
+  "telemetry-off", "ads-off", "web-search-off", "activity-history-off", "copilot-off", "recall-off", "lockscreen-tips-off",
+  "tailored-off", "typing-data-off", "error-reporting-off", "delivery-optimization-off", "widgets-off",
+]
+
+[[profile]]
+id = "blindagem"
+title = { pt = "Blindagem", en = "Hardening" }
+description = { pt = "Liga as proteções do Windows que vêm desligadas ou fracas: firewall, SMBv1 fora, UAC, SmartScreen, LSA, PUA e mais.", en = "Turns on Windows protections that ship off or weak: firewall, SMBv1 off, UAC, SmartScreen, LSA, PUA and more." }
+tweaks = [
+  "sec-firewall", "sec-smb1-off", "sec-autorun-off", "sec-smartscreen", "sec-llmnr-off", "sec-uac", "sec-pua",
+  "sec-network-protection", "sec-lsa",
+]
+
+[[profile]]
+id = "minimo"
+title = { pt = "Limpeza", en = "Cleanup" }
+description = { pt = "Remove os apps pré-instalados mais comuns e desliga as sugestões do Windows. Não mexe em desempenho.", en = "Removes the most common preinstalled apps and turns off Windows suggestions. Does not touch performance." }
+tweaks = ["ads-off", "lockscreen-tips-off", "widgets-off", "tailored-off"]
+debloat = [
+  "Microsoft.BingNews", "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted", "Microsoft.MicrosoftSolitaireCollection",
+  "Microsoft.MicrosoftOfficeHub", "Microsoft.People", "Microsoft.WindowsFeedbackHub", "Microsoft.WindowsMaps", "Microsoft.ZuneVideo",
+  "Clipchamp.Clipchamp", "Microsoft.549981C3F5F10", "Microsoft.MixedReality.Portal", "Microsoft.Microsoft3DViewer", "Microsoft.SkypeApp",
+]

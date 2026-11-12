@@ -1,0 +1,130 @@
+# Apps pré-instalados que podem ser removidos. Lista fechada: nada fora dela é removido,
+# e nada que jogos usam (Xbox Identity/TCUI, Store, Game Bar) está aqui.
+
+[[bloat]]
+id = "Microsoft.BingNews"
+name = "Notícias / News"
+desc = { pt = "Feed de notícias do MSN.", en = "MSN news feed." }
+
+[[bloat]]
+id = "Microsoft.BingWeather"
+name = "Clima / Weather"
+desc = { pt = "App de previsão do tempo.", en = "Weather forecast app." }
+
+[[bloat]]
+id = "Microsoft.BingSearch"
+name = "Bing Search"
+desc = { pt = "Integração de busca do Bing.", en = "Bing search integration." }
+
+[[bloat]]
+id = "Microsoft.GetHelp"
+name = "Obter Ajuda"
+desc = { pt = "Assistente de suporte da Microsoft.", en = "Microsoft support assistant." }
+
+[[bloat]]
+id = "Microsoft.Getstarted"
+name = "Dicas / Tips"
+desc = { pt = "Dicas do Windows.", en = "Windows tips." }
+
+[[bloat]]
+id = "Microsoft.MicrosoftSolitaireCollection"
+name = "Solitaire Collection"
+desc = { pt = "Jogos de cartas com anúncios.", en = "Card games with ads." }
+
+[[bloat]]
+id = "Microsoft.MicrosoftOfficeHub"
+name = "Microsoft 365 (Office Hub)"
+desc = { pt = "Atalho para assinar o Office.", en = "Shortcut to subscribe to Office." }
+
+[[bloat]]
+id = "Microsoft.People"
+name = "Pessoas / People"
+desc = { pt = "App de contatos.", en = "Contacts app." }
+
+[[bloat]]
+id = "Microsoft.WindowsFeedbackHub"
+name = "Hub de Comentários"
+desc = { pt = "Envio de feedback para a Microsoft.", en = "Sends feedback to Microsoft." }
+
+[[bloat]]
+id = "Microsoft.WindowsMaps"
+name = "Mapas / Maps"
+desc = { pt = "Mapas offline.", en = "Offline maps." }
+
+[[bloat]]
+id = "Microsoft.ZuneVideo"
+name = "Filmes e TV"
+desc = { pt = "Player de vídeo antigo.", en = "Legacy video player." }
+
+[[bloat]]
+id = "Microsoft.Todos"
+name = "Microsoft To Do"
+desc = { pt = "Lista de tarefas.", en = "Task list." }
+
+[[bloat]]
+id = "Microsoft.PowerAutomateDesktop"
+name = "Power Automate"
+desc = { pt = "Automação de tarefas.", en = "Task automation." }
+
+[[bloat]]
+id = "Clipchamp.Clipchamp"
+name = "Clipchamp"
+desc = { pt = "Editor de vídeo online.", en = "Online video editor." }
+
+[[bloat]]
+id = "MicrosoftTeams"
+name = "Teams (pessoal)"
+desc = { pt = "Chat do Teams pessoal.", en = "Personal Teams chat." }
+
+[[bloat]]
+id = "MSTeams"
+name = "Teams"
+desc = { pt = "Microsoft Teams.", en = "Microsoft Teams." }
+caution = { pt = "Não remova se usa o Teams para trabalho ou escola.", en = "Keep it if you use Teams for work or school." }
+
+[[bloat]]
+id = "Microsoft.549981C3F5F10"
+name = "Cortana"
+desc = { pt = "Assistente Cortana (descontinuado).", en = "Cortana assistant (discontinued)." }
+
+[[bloat]]
+id = "Microsoft.YourPhone"
+name = "Vincular ao Celular"
+desc = { pt = "Integração com celular.", en = "Phone integration." }
+caution = { pt = "Remova só se não usa notificações do celular no PC.", en = "Only remove if you do not use phone notifications on PC." }
+
+[[bloat]]
+id = "Microsoft.MixedReality.Portal"
+name = "Portal de Realidade Mista"
+desc = { pt = "Para headsets Windows Mixed Reality.", en = "For Windows Mixed Reality headsets." }
+
+[[bloat]]
+id = "Microsoft.Microsoft3DViewer"
+name = "Visualizador 3D"
+desc = { pt = "Visualizador de modelos 3D.", en = "3D model viewer." }
+
+[[bloat]]
+id = "Microsoft.SkypeApp"
+name = "Skype"
+desc = { pt = "Skype (descontinuado).", en = "Skype (discontinued)." }
+
+[[bloat]]
+id = "Microsoft.OutlookForWindows"
+name = "Outlook (novo)"
+desc = { pt = "Novo cliente de email.", en = "New email client." }
+caution = { pt = "Não remova se usa para seus emails.", en = "Keep it if you use it for email." }
+
+[[bloat]]
+id = "Microsoft.Windows.DevHome"
+name = "Dev Home"
+desc = { pt = "Painel para desenvolvedores.", en = "Developer dashboard." }
+[[bloat]]
+id = "Microsoft.GamingApp"
+name = "App Xbox"
+desc = { pt = "Loja e biblioteca do PC Game Pass.", en = "PC Game Pass store and library." }
+caution = { pt = "Não remova se joga pelo Game Pass. Os jogos da Steam/Epic não precisam dele.", en = "Keep it if you play Game Pass. Steam/Epic games do not need it." }
+
+[[bloat]]
+id = "Microsoft.Copilot"
+name = "Copilot (app)"
+desc = { pt = "App do Copilot que vem instalado no Windows 11.", en = "Copilot app that ships with Windows 11." }

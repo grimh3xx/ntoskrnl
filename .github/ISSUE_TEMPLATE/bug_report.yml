@@ -1,0 +1,29 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ...
+        2. Press ...
+  - type: input
+    attributes:
+      label: Version
+      placeholder: "e.g. v1.0.0 or commit hash"
+  - type: input
+    attributes:
+      label: OS / environment
+      placeholder: "e.g. Windows 11 24H2 (26100), Windows 10 22H2"
+  - type: textarea
+    attributes:
+      label: Logs or output
+      description: The Log tab, or the output of the command. `ntoskrnl list --json` helps too.
+      render: text

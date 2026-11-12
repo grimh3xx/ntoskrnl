@@ -1,0 +1,31 @@
+name: build
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Clippy
+        run: cargo clippy --release -- -D warnings
+      - name: Build
+        run: cargo build --release
+      - name: Smoke test
+        run: target/release/ntoskrnl.exe --help
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ntoskrnl-x64
+          path: target/release/ntoskrnl.exe
+  test:
+    # os testes do motor usam o registro simulado, que só existe fora do Windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test

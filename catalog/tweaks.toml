@@ -1,0 +1,2025 @@
+# Catálogo de tweaks. Cada valor de registro e serviço tem backup automático antes de mudar;
+# comandos trazem o próprio backup/revert/verify. O backup chega no PowerShell em $env:NTOSKRNL_BACKUP.
+
+[[tweak]]
+id = "power-throttling-off"
+category = "power"
+risk = "moderate"
+title = { pt = "Desativar Power Throttling", en = "Disable Power Throttling" }
+summary = { pt = "Programas abertos atrás do jogo (Discord, OBS) não ficam lentos.", en = "Apps running behind the game (Discord, OBS) do not slow down." }
+description = { pt = "Impede o Windows de reduzir o clock de processos em segundo plano (ex.: Discord, OBS) enquanto você joga.", en = "Stops Windows from throttling background processes (e.g. Discord, OBS) while you play." }
+warning = { pt = "Em notebooks, aumenta o consumo de bateria.", en = "On laptops, increases battery drain." }
+requires = { desktop_only = true }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling"
+name = "PowerThrottlingOff"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "usb-suspend-off"
+category = "power"
+risk = "safe"
+title = { pt = "USB sem suspensão seletiva", en = "USB selective suspend off" }
+summary = { pt = "Mouse, teclado e headset não somem nem cortam por economia de energia.", en = "Mouse, keyboard and headset no longer drop out or cut from power saving." }
+description = { pt = "Na tomada, o Windows para de \"adormecer\" as portas USB sem uso. Resolve mouse, teclado ou headset que somem por um instante ou cortam o áudio, e a primeira tecla que demora a responder.", en = "On AC power, Windows stops putting idle USB ports to sleep. Fixes mice, keyboards or headsets that drop out for a moment or cut audio, and the first key press that responds late." }
+[[tweak.cmd]]
+key = "usbsuspend"
+backup = '''
+$q = powercfg /query SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 2>$null | Out-String
+$m = [regex]::Matches($q, '0x([0-9a-fA-F]{8})')
+if ($m.Count -ge 2) { [Convert]::ToInt64($m[$m.Count - 2].Groups[1].Value, 16) }
+'''
+apply = '''
+powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 | Out-Null
+powercfg /setactive SCHEME_CURRENT | Out-Null
+'''
+verify = '''
+$q = powercfg /query SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 2>$null | Out-String
+$m = [regex]::Matches($q, '0x([0-9a-fA-F]{8})')
+if ($m.Count -ge 2 -and [Convert]::ToInt64($m[$m.Count - 2].Groups[1].Value, 16) -eq 0) { 'ok' } else { 'o Windows não aceitou a opção do plano de energia' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -match '^\d+$') {
+  powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 $env:NTOSKRNL_BACKUP | Out-Null
+  powercfg /setactive SCHEME_CURRENT | Out-Null
+}
+'''
+
+[[tweak]]
+id = "pcie-aspm-off"
+category = "power"
+risk = "safe"
+title = { pt = "PCI Express sem economia de energia", en = "PCI Express power saving off" }
+summary = { pt = "Menos travadinhas ao carregar áreas e abrir menus do jogo.", en = "Fewer hitches when loading areas and opening game menus." }
+description = { pt = "Na tomada, desliga o \"Gerenciamento de energia do estado do link\" do PCIe. A placa de vídeo e o SSD não precisam \"acordar\" o barramento a cada carga nova, o que tira travadinhas curtas ao abrir menus e carregar áreas do jogo.", en = "On AC power, turns off PCIe \"Link State Power Management\". The graphics card and SSD no longer have to wake the bus on each new load, removing short hitches when opening menus and loading game areas." }
+[[tweak.cmd]]
+key = "aspm"
+backup = '''
+$q = powercfg /query SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 2>$null | Out-String
+$m = [regex]::Matches($q, '0x([0-9a-fA-F]{8})')
+if ($m.Count -ge 2) { [Convert]::ToInt64($m[$m.Count - 2].Groups[1].Value, 16) }
+'''
+apply = '''
+powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 0 | Out-Null
+powercfg /setactive SCHEME_CURRENT | Out-Null
+'''
+verify = '''
+$q = powercfg /query SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 2>$null | Out-String
+$m = [regex]::Matches($q, '0x([0-9a-fA-F]{8})')
+if ($m.Count -ge 2 -and [Convert]::ToInt64($m[$m.Count - 2].Groups[1].Value, 16) -eq 0) { 'ok' } else { 'o Windows não aceitou a opção do plano de energia' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -match '^\d+$') {
+  powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 $env:NTOSKRNL_BACKUP | Out-Null
+  powercfg /setactive SCHEME_CURRENT | Out-Null
+}
+'''
+
+[[tweak]]
+id = "hibernation-off"
+category = "power"
+risk = "moderate"
+title = { pt = "Desativar hibernação", en = "Disable hibernation" }
+summary = { pt = "Libera vários GB no disco C:. O PC deixa de hibernar.", en = "Frees several GB on drive C:. The PC stops hibernating." }
+description = { pt = "Remove o hiberfil.sys e libera no disco C: um espaço do tamanho de boa parte da sua RAM. Também desliga a Inicialização Rápida.", en = "Removes hiberfil.sys, freeing disk space roughly the size of much of your RAM. Also disables Fast Startup." }
+warning = { pt = "Não use em notebook se você hiberna com frequência.", en = "Skip on laptops if you hibernate often." }
+requires = { desktop_only = true }
+[[tweak.cmd]]
+key = "hiber"
+backup = '''
+(Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
+'''
+apply = '''
+powercfg /hibernate off | Out-Null
+'''
+verify = '''
+if ((Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled -eq 0) { 'ok' } else { 'a hibernação continua ligada' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -ne '0') { powercfg /hibernate on | Out-Null }
+'''
+
+[[tweak]]
+id = "fast-startup-off"
+category = "power"
+risk = "safe"
+title = { pt = "Desativar a Inicialização Rápida", en = "Disable Fast Startup" }
+summary = { pt = "Desligar passa a desligar de verdade: menos bugs de Wi-Fi, som e USB.", en = "Shutting down really shuts down: fewer Wi-Fi, sound and USB bugs." }
+description = { pt = "Desligar passa a desligar de verdade: os drivers começam do zero a cada vez (menos bugs de Wi-Fi, áudio e USB) e o \"tempo ligado\" volta a zerar. A hibernação continua funcionando, inclusive no notebook.", en = "Shutting down really shuts down: drivers start fresh every time (fewer Wi-Fi, audio and USB bugs) and uptime resets again. Hibernation keeps working, laptops included." }
+warning = { pt = "O PC pode levar alguns segundos a mais para ligar.", en = "The PC may take a few more seconds to boot." }
+requires = { ssd = true }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power"
+name = "HiberbootEnabled"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "game-dvr-off"
+category = "gaming"
+risk = "safe"
+title = { pt = "Desativar Game DVR e captura em segundo plano", en = "Disable Game DVR and background capture" }
+summary = { pt = "O Windows para de gravar o jogo escondido, o que tira FPS.", en = "Windows stops secretly recording your games, which costs FPS." }
+description = { pt = "A gravação em segundo plano da Xbox Game Bar consome GPU e causa quedas de FPS mesmo sem você gravar nada.", en = "Xbox Game Bar background recording uses GPU and causes FPS drops even when you are not recording." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR"
+name = "AllowGameDVR"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameDVR"
+name = "AppCaptureEnabled"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "windows-game-mode"
+category = "gaming"
+risk = "safe"
+title = { pt = "Ativar Modo de Jogo do Windows", en = "Enable Windows Game Mode" }
+summary = { pt = "O Windows dá prioridade ao jogo aberto e segura atualizações durante a partida.", en = "Windows prioritizes the open game and holds updates during matches." }
+description = { pt = "Faz o Windows priorizar o jogo em primeiro plano e adiar atualizações e notificações durante a partida.", en = "Makes Windows prioritize the foreground game and postpone updates and notifications while you play." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\GameBar"
+name = "AutoGameModeEnabled"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\GameBar"
+name = "AllowAutoGameMode"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "mmcss-games"
+category = "gaming"
+risk = "safe"
+title = { pt = "Prioridade de CPU e GPU para jogos", en = "CPU and GPU priority for games" }
+summary = { pt = "O jogo ganha prioridade sobre o que roda em segundo plano.", en = "The game gets priority over background tasks." }
+description = { pt = "Ajusta o agendador multimídia (MMCSS): menos CPU reservada para tarefas de fundo e prioridade alta de GPU e E/S para jogos.", en = "Tunes the multimedia scheduler (MMCSS): less CPU reserved for background tasks and high GPU/IO priority for games." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile"
+name = "SystemResponsiveness"
+type = "REG_DWORD"
+value = 10
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile"
+name = "NetworkThrottlingIndex"
+type = "REG_DWORD"
+value = 4294967295
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games"
+name = "GPU Priority"
+type = "REG_DWORD"
+value = 8
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games"
+name = "Priority"
+type = "REG_DWORD"
+value = 6
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games"
+name = "Scheduling Category"
+type = "REG_SZ"
+value = "High"
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games"
+name = "SFIO Priority"
+type = "REG_SZ"
+value = "High"
+
+[[tweak]]
+id = "foreground-priority"
+category = "gaming"
+risk = "safe"
+title = { pt = "Prioridade para o programa em primeiro plano", en = "Foreground program priority" }
+summary = { pt = "O programa na tela (o jogo) recebe mais tempo do processador.", en = "The app on screen (your game) gets more CPU time." }
+description = { pt = "Win32PrioritySeparation = 0x26: fatias de tempo curtas e variáveis com reforço para a janela ativa. Melhora a resposta do jogo.", en = "Win32PrioritySeparation = 0x26: short, variable quanta boosted for the active window. Improves game responsiveness." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl"
+name = "Win32PrioritySeparation"
+type = "REG_DWORD"
+value = 38
+
+[[tweak]]
+id = "fso-off"
+category = "gaming"
+risk = "moderate"
+title = { pt = "Desativar otimizações de tela cheia (FSO)", en = "Disable fullscreen optimizations (FSO)" }
+summary = { pt = "Tela cheia \"de verdade\" em jogos antigos: pode reduzir o atraso.", en = "Real fullscreen in older games: can reduce delay." }
+description = { pt = "Força a tela cheia exclusiva de verdade em jogos DirectX 9 a 11. Em muitos jogos reduz o input lag.", en = "Forces true exclusive fullscreen in DirectX 9-11 games. Reduces input lag in many titles." }
+warning = { pt = "Alt+Tab fica mais lento, e o Auto HDR pode deixar de funcionar em alguns jogos.", en = "Alt+Tab gets slower and Auto HDR may stop working in some games." }
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_FSEBehaviorMode"
+type = "REG_DWORD"
+value = 2
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_FSEBehavior"
+type = "REG_DWORD"
+value = 2
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_HonorUserFSEBehaviorMode"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_DXGIHonorFSEWindowsCompatible"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\System\\GameConfigStore"
+name = "GameDVR_EFSEFeatureFlags"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "hags-on"
+category = "gpu"
+risk = "safe"
+restart = true
+title = { pt = "Agendamento de GPU acelerado por hardware (HAGS)", en = "Hardware-accelerated GPU scheduling (HAGS)" }
+summary = { pt = "A placa de vídeo organiza o próprio trabalho: menos atraso, e necessário para geração de quadros.", en = "The graphics card schedules its own work: less delay, and required for frame generation." }
+description = { pt = "A própria GPU gerencia sua memória de vídeo. Menos latência e necessário para o DLSS Frame Generation. Precisa de GPU e driver compatíveis.", en = "The GPU manages its own video memory. Lower latency and required for DLSS Frame Generation. Needs a compatible GPU and driver." }
+requires = { min_build = 19041 }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers"
+name = "HwSchMode"
+type = "REG_DWORD"
+value = 2
+
+[[tweak]]
+id = "gpu-preemption-off"
+category = "gpu"
+risk = "advanced"
+restart = true
+title = { pt = "Desativar preempção da GPU", en = "Disable GPU preemption" }
+summary = { pt = "Pode diminuir microtravadas em alguns PCs. Em outros, causa travamento.", en = "May reduce micro-stutter on some PCs. On others, it causes freezes." }
+description = { pt = "Impede o Windows de interromper o trabalho da GPU no meio de um frame. Pode reduzir microtravamentos.", en = "Stops Windows from interrupting GPU work mid-frame. May reduce microstutter." }
+warning = { pt = "Em alguns drivers causa travamento ou tela preta. Teste e reverta se notar instabilidade.", en = "Some drivers freeze or show a black screen. Test it and revert if you notice instability." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers\\Scheduler"
+name = "EnablePreemption"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "nvidia-hdcp-off"
+category = "gpu"
+risk = "advanced"
+restart = true
+title = { pt = "Desativar HDCP (NVIDIA)", en = "Disable HDCP (NVIDIA)" }
+summary = { pt = "Tira uma proteção de vídeo que pesa em algumas placas NVIDIA. Netflix e afins podem parar de abrir.", en = "Removes a video protection that weighs on some NVIDIA cards. Netflix and similar may stop working." }
+description = { pt = "Remove a verificação de proteção de conteúdo do driver NVIDIA, que pode causar pequenos travamentos.", en = "Removes the NVIDIA driver content-protection handshake, which can cause small hitches." }
+warning = { pt = "Netflix, Prime Video e outros serviços com DRM podem não tocar em HD.", en = "Netflix, Prime Video and other DRM services may not play in HD." }
+requires = { gpu = "nvidia" }
+[[tweak.cmd]]
+key = "hdcp"
+apply = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).ProviderName -match 'NVIDIA' } |
+  ForEach-Object { Set-ItemProperty $_.PSPath -Name RMHdcpKeyglobZero -Value 1 -Type DWord }
+'''
+verify = '''
+if (@(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).ProviderName -match 'NVIDIA' } | Where-Object { (Get-ItemProperty $_.PSPath).RMHdcpKeyglobZero -ne 1 }).Count) { 'o driver NVIDIA não aceitou' } else { 'ok' }
+'''
+revert = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  ForEach-Object { Remove-ItemProperty -Path $_.PSPath -Name RMHdcpKeyglobZero -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "msi-mode"
+category = "gpu"
+risk = "advanced"
+restart = true
+title = { pt = "Modo MSI para placa de vídeo e de rede", en = "MSI mode for graphics and network cards" }
+summary = { pt = "Placa de vídeo e de rede interrompem menos o processador: menos chance de travadinhas.", en = "Graphics and network cards interrupt the CPU less: lower chance of microstutter." }
+description = { pt = "As placas avisam o processador por mensagem (Message Signaled Interrupts) em vez da linha de interrupção compartilhada. Reduz o tempo que o processador gasta atendendo drivers, uma causa de travadinhas. Placas e drivers recentes já usam MSI: nesses casos nada muda. Só mexe na placa de vídeo e na de rede, que sempre aceitam.", en = "The cards signal the CPU with messages (Message Signaled Interrupts) instead of the shared interrupt line. Cuts the time the CPU spends serving drivers, one cause of microstutter. Recent cards and drivers already use MSI: then nothing changes. Only touches the graphics and network cards, which always support it." }
+warning = { pt = "Raramente, um driver antigo não inicia em MSI (tela preta ou sem internet depois de reiniciar). Se acontecer, reverta pelo app ou no Modo de Segurança.", en = "Rarely, an old driver fails to start in MSI mode (black screen or no internet after restart). If so, revert it in the app or in Safe Mode." }
+[[tweak.cmd]]
+key = "msi"
+backup = '''
+$o = @{}
+Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { ($_.Class -eq 'Display' -or $_.Class -eq 'Net') -and $_.InstanceId -like 'PCI\*' } | ForEach-Object {
+  $k = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.InstanceId)\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+  $v = (Get-ItemProperty $k -ErrorAction SilentlyContinue).MSISupported
+  $o[$_.InstanceId] = if ($null -eq $v) { '__none__' } else { [string]$v }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { ($_.Class -eq 'Display' -or $_.Class -eq 'Net') -and $_.InstanceId -like 'PCI\*' } | ForEach-Object {
+  $k = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.InstanceId)\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+  if (-not (Test-Path $k)) { New-Item $k -Force | Out-Null }
+  Set-ItemProperty $k -Name MSISupported -Value 1 -Type DWord
+}
+'''
+verify = '''
+$bad = @()
+Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { ($_.Class -eq 'Display' -or $_.Class -eq 'Net') -and $_.InstanceId -like 'PCI\*' } | ForEach-Object {
+  $k = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.InstanceId)\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+  if ((Get-ItemProperty $k -ErrorAction SilentlyContinue).MSISupported -ne 1) { $bad += $_.FriendlyName }
+}
+if ($bad.Count) { 'o Windows não deixou mudar: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+if (-not $env:NTOSKRNL_BACKUP) { return }
+($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+  $k = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.Name)\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+  if ($_.Value -eq '__none__') { Remove-ItemProperty $k -Name MSISupported -ErrorAction SilentlyContinue }
+  elseif (Test-Path $k) { Set-ItemProperty $k -Name MSISupported -Value ([int]$_.Value) -Type DWord }
+}
+'''
+
+[[tweak]]
+id = "windowed-game-optimizations"
+category = "gpu"
+risk = "safe"
+title = { pt = "Otimizações para jogos em janela", en = "Optimizations for windowed games" }
+summary = { pt = "Jogos em janela sem borda com menos atraso, quase igual à tela cheia.", en = "Borderless windowed games with less delay, almost like fullscreen." }
+description = { pt = "Jogos em janela ou tela cheia sem borda usam o modo de apresentação moderno (flip model): menos latência e suporte a VRR/G-Sync em janela.", en = "Windowed and borderless games use the modern flip presentation model: lower latency and VRR/G-Sync support in windowed mode." }
+requires = { min_build = 22000 }
+[[tweak.cmd]]
+key = "dxswap"
+backup = '''
+$v = (Get-ItemProperty 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -ErrorAction SilentlyContinue).DirectXUserGlobalSettings
+if ($null -eq $v) { '__none__' } else { 'v:' + $v }
+'''
+apply = '''
+$p = 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences'
+if (-not (Test-Path $p)) { New-Item $p -Force | Out-Null }
+$v = [string](Get-ItemProperty $p -ErrorAction SilentlyContinue).DirectXUserGlobalSettings
+$v = $v -replace 'SwapEffectUpgradeEnable=[^;]*;?', ''
+Set-ItemProperty $p -Name DirectXUserGlobalSettings -Value ($v + 'SwapEffectUpgradeEnable=1;') -Type String
+'''
+verify = '''
+if ([string](Get-ItemProperty 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -ErrorAction SilentlyContinue).DirectXUserGlobalSettings -match 'SwapEffectUpgradeEnable=1;') { 'ok' } else { 'a opção de gráficos não foi gravada' }
+'''
+revert = '''
+$b = $env:NTOSKRNL_BACKUP
+if (-not $b) { return }
+$p = 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences'
+$v = [string](Get-ItemProperty $p -ErrorAction SilentlyContinue).DirectXUserGlobalSettings
+$v = $v -replace 'SwapEffectUpgradeEnable=[^;]*;?', ''
+# devolve só a nossa opção ao que era antes (as outras podem ter mudado nesse meio-tempo)
+if ($b.StartsWith('v:') -and $b -match 'SwapEffectUpgradeEnable=([^;]*)') { $v += 'SwapEffectUpgradeEnable=' + $Matches[1] + ';' }
+if ($v) { Set-ItemProperty $p -Name DirectXUserGlobalSettings -Value $v -Type String }
+elseif ($b -eq '__none__') { Remove-ItemProperty $p -Name DirectXUserGlobalSettings -ErrorAction SilentlyContinue }
+else { Set-ItemProperty $p -Name DirectXUserGlobalSettings -Value '' -Type String }
+'''
+
+[[tweak]]
+id = "mpo-off"
+category = "gpu"
+risk = "moderate"
+restart = true
+title = { pt = "Desativar MPO (Multiplane Overlay)", en = "Disable MPO (Multiplane Overlay)" }
+summary = { pt = "Resolve tela piscando e travadas com dois monitores ou ao gravar a tela.", en = "Fixes screen flicker and stutter with two monitors or while recording." }
+description = { pt = "Resolve tela piscando, travadinhas e \"flicker\" em vídeo no segundo monitor. Correção recomendada pela própria NVIDIA para esses sintomas.", en = "Fixes flickering, hitches and video flicker on a second monitor. A fix NVIDIA itself recommends for these symptoms." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\Dwm"
+name = "OverlayTestMode"
+type = "REG_DWORD"
+value = 5
+
+[[tweak]]
+id = "tdr-delay"
+category = "gpu"
+risk = "moderate"
+restart = true
+title = { pt = "Mais tempo antes de reiniciar o driver (TDR)", en = "Longer driver timeout (TDR)" }
+summary = { pt = "Jogos pesados param de fechar com \"o driver de vídeo parou de responder\".", en = "Heavy games stop crashing with \"display driver stopped responding\"." }
+description = { pt = "O Windows espera 10 s em vez de 2 s antes de reiniciar o driver de vídeo. Evita o erro \"o driver parou de responder\" em cargas pesadas.", en = "Windows waits 10 s instead of 2 s before resetting the graphics driver. Avoids \"display driver stopped responding\" under heavy load." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers"
+name = "TdrDelay"
+type = "REG_DWORD"
+value = 10
+
+[[tweak]]
+id = "nvidia-max-pstate"
+category = "gpu"
+risk = "advanced"
+restart = true
+title = { pt = "GPU NVIDIA sempre no clock máximo", en = "NVIDIA GPU always at max clock" }
+summary = { pt = "A placa NVIDIA fica sempre no máximo: menos quedas de FPS, mais calor e consumo.", en = "The NVIDIA card stays at full speed: fewer FPS drops, more heat and power draw." }
+description = { pt = "Impede a placa de baixar o clock entre cenas. Elimina quedas de FPS quando o jogo alterna entre carga leve e pesada.", en = "Stops the card from downclocking between scenes. Removes FPS dips when the game switches between light and heavy load." }
+warning = { pt = "A placa gasta mais energia e esquenta mais mesmo parada. Não use em notebook.", en = "The card draws more power and runs hotter even at idle. Do not use on laptops." }
+requires = { gpu = "nvidia", desktop_only = true }
+[[tweak.cmd]]
+key = "pstate"
+apply = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).ProviderName -match 'NVIDIA' } |
+  ForEach-Object { Set-ItemProperty $_.PSPath -Name DisableDynamicPstate -Value 1 -Type DWord }
+'''
+verify = '''
+if (@(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).ProviderName -match 'NVIDIA' } | Where-Object { (Get-ItemProperty $_.PSPath).DisableDynamicPstate -ne 1 }).Count) { 'o driver NVIDIA não aceitou' } else { 'ok' }
+'''
+revert = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  ForEach-Object { Remove-ItemProperty -Path $_.PSPath -Name DisableDynamicPstate -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "amd-ulps-off"
+category = "gpu"
+risk = "moderate"
+restart = true
+title = { pt = "Desativar ULPS (AMD)", en = "Disable ULPS (AMD)" }
+summary = { pt = "Menos travadas da placa AMD ao sair do repouso.", en = "Fewer AMD card hitches when waking from idle." }
+description = { pt = "Desliga o modo de economia profunda das placas AMD, que causa travadas ao sair do repouso e instabilidade em overclock.", en = "Turns off the AMD deep power-saving state, which causes hitches when waking and instability when overclocking." }
+requires = { gpu = "amd" }
+[[tweak.cmd]]
+key = "ulps"
+backup = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  ForEach-Object { $v = (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).EnableUlps; if ($null -ne $v) { "$($_.PSChildName)=$v" } } | Out-String
+'''
+apply = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue |
+  Where-Object { $null -ne (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).EnableUlps } |
+  ForEach-Object { Set-ItemProperty $_.PSPath -Name EnableUlps -Value 0 -Type DWord }
+'''
+verify = '''
+$on = @(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue | Where-Object { $v = (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).EnableUlps; $null -ne $v -and $v -ne 0 })
+if ($on.Count) { 'o driver AMD não aceitou' } else { 'ok' }
+'''
+revert = '''
+foreach ($l in ($env:NTOSKRNL_BACKUP -split "\r?\n")) {
+  if ($l -match '^(\d{4})=(\d+)$') { Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\$($Matches[1])" -Name EnableUlps -Value ([int]$Matches[2]) -Type DWord }
+}
+'''
+
+[[tweak]]
+id = "mouse-accel-off"
+category = "input"
+risk = "safe"
+title = { pt = "Desativar aceleração do mouse", en = "Disable mouse acceleration" }
+summary = { pt = "A mira anda exatamente o quanto você move o mouse.", en = "Your aim moves exactly as much as you move the mouse." }
+description = { pt = "Desliga o \"Aumentar precisão do ponteiro\". O cursor anda exatamente o quanto você move o mouse (1:1), essencial para mira consistente.", en = "Turns off \"Enhance pointer precision\". The cursor moves exactly as much as your mouse (1:1), essential for consistent aim." }
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Mouse"
+name = "MouseSpeed"
+type = "REG_SZ"
+value = "0"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Mouse"
+name = "MouseThreshold1"
+type = "REG_SZ"
+value = "0"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Mouse"
+name = "MouseThreshold2"
+type = "REG_SZ"
+value = "0"
+
+[[tweak]]
+id = "accessibility-shortcuts-off"
+category = "input"
+risk = "safe"
+title = { pt = "Desativar atalhos de acessibilidade", en = "Disable accessibility shortcuts" }
+summary = { pt = "Apertar Shift 5 vezes no meio do jogo não abre mais aquela janela.", en = "Pressing Shift 5 times mid-game no longer opens that window." }
+description = { pt = "Acaba com o pop-up de Teclas de Aderência ao apertar Shift 5 vezes no meio do jogo, e com as Teclas do Mouse ligando sozinhas no Alt+Shift+NumLock. Os recursos continuam disponíveis nas Configurações.", en = "Stops the Sticky Keys pop-up when you press Shift 5 times mid-game, and Mouse Keys turning on from Alt+Shift+NumLock. The features remain available in Settings." }
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Accessibility\\StickyKeys"
+name = "Flags"
+type = "REG_SZ"
+value = "506"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Accessibility\\ToggleKeys"
+name = "Flags"
+type = "REG_SZ"
+value = "58"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Accessibility\\Keyboard Response"
+name = "Flags"
+type = "REG_SZ"
+value = "122"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Accessibility\\MouseKeys"
+name = "Flags"
+type = "REG_SZ"
+value = "58"
+
+[[tweak]]
+id = "keyboard-repeat-fast"
+category = "input"
+risk = "safe"
+title = { pt = "Repetição do teclado no máximo", en = "Fastest keyboard repeat" }
+summary = { pt = "Tecla segurada repete mais cedo e mais rápido.", en = "Held keys repeat sooner and faster." }
+description = { pt = "Tecla segurada começa a repetir mais cedo e repete mais rápido (atraso mínimo e velocidade máxima do Painel de Controle). Vale depois de sair e entrar na conta.", en = "Held keys start repeating sooner and repeat faster (shortest delay and fastest rate in Control Panel). Applies after signing out and back in." }
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Keyboard"
+name = "KeyboardDelay"
+type = "REG_SZ"
+value = "0"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Keyboard"
+name = "KeyboardSpeed"
+type = "REG_SZ"
+value = "31"
+
+[[tweak]]
+id = "responsive-ui"
+category = "system"
+risk = "safe"
+title = { pt = "Windows mais responsivo", en = "Snappier Windows" }
+summary = { pt = "Menus e janelas abrem na hora, sem animação de espera.", en = "Menus and windows open instantly, without waiting animations." }
+description = { pt = "Menus abrem sem atraso, os apps de inicialização carregam sem espera artificial e as animações da barra de tarefas são desligadas.", en = "Menus open with no delay, startup apps load without artificial wait and taskbar animations are disabled." }
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Desktop"
+name = "MenuShowDelay"
+type = "REG_SZ"
+value = "0"
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Mouse"
+name = "MouseHoverTime"
+type = "REG_SZ"
+value = "10"
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize"
+name = "StartupDelayInMSec"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "TaskbarAnimations"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\Control Panel\\Desktop\\WindowMetrics"
+name = "MinAnimate"
+type = "REG_SZ"
+value = "0"
+
+[[tweak]]
+id = "transparency-off"
+category = "system"
+risk = "safe"
+title = { pt = "Desativar transparência", en = "Disable transparency" }
+summary = { pt = "Tira o efeito de vidro das janelas: um pouco menos de trabalho para a placa de vídeo.", en = "Removes the glass effect from windows: a bit less work for the graphics card." }
+description = { pt = "Remove o efeito de vidro da barra de tarefas e do menu Iniciar. Alivia a GPU em PCs mais fracos.", en = "Removes the glass effect from the taskbar and Start menu. Eases GPU load on weaker PCs." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+name = "EnableTransparency"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "visual-effects-performance"
+category = "system"
+risk = "moderate"
+title = { pt = "Efeitos visuais: melhor desempenho", en = "Visual effects: best performance" }
+summary = { pt = "Windows mais simples e rápido, com menos animações e sombras.", en = "Simpler, faster Windows with fewer animations and shadows." }
+description = { pt = "Desliga sombras, animações e suavização de janelas. Ganho perceptível em PCs fracos e integrados.", en = "Turns off shadows, animations and window smoothing. Noticeable gain on weak PCs and integrated graphics." }
+warning = { pt = "O Windows fica visualmente mais simples.", en = "Windows will look plainer." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects"
+name = "VisualFXSetting"
+type = "REG_DWORD"
+value = 2
+
+[[tweak]]
+id = "background-apps-off"
+category = "system"
+risk = "moderate"
+title = { pt = "Bloquear apps da Store em segundo plano", en = "Block Store apps in the background" }
+summary = { pt = "Apps da Microsoft Store param de rodar escondidos.", en = "Microsoft Store apps stop running hidden in the background." }
+description = { pt = "Impede que apps da Microsoft Store (Clima, Notícias, Fotos etc.) fiquem rodando escondidos gastando RAM e CPU.", en = "Stops Microsoft Store apps (Weather, News, Photos etc.) from running hidden and using RAM and CPU." }
+warning = { pt = "Notificações de apps da Store (ex.: Email e Calendário) podem parar de chegar.", en = "Notifications from Store apps (e.g. Mail and Calendar) may stop arriving." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications"
+name = "GlobalUserDisabled"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy"
+name = "LetAppsRunInBackground"
+type = "REG_DWORD"
+value = 2
+
+[[tweak]]
+id = "memory-compression-off"
+category = "system"
+risk = "safe"
+restart = true
+title = { pt = "Desativar compressão de memória", en = "Disable memory compression" }
+summary = { pt = "Com bastante RAM, o processador para de compactar memória à toa.", en = "With plenty of RAM, the CPU stops compressing memory needlessly." }
+description = { pt = "Com 16 GB ou mais de RAM, comprimir memória só gasta CPU. Libera ciclos para o jogo.", en = "With 16 GB+ of RAM, compressing memory just burns CPU. Frees cycles for the game." }
+requires = { min_ram_gb = 16 }
+[[tweak.cmd]]
+key = "mmagent"
+backup = '''
+(Get-MMAgent).MemoryCompression
+'''
+apply = '''
+Disable-MMAgent -MemoryCompression
+'''
+verify = '''
+if (-not (Get-MMAgent).MemoryCompression) { 'ok' } else { 'a compressão de memória continua ligada' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -ne 'False') { Enable-MMAgent -MemoryCompression }
+'''
+
+[[tweak]]
+id = "sysmain-off"
+category = "system"
+risk = "moderate"
+title = { pt = "Desativar SysMain (Superfetch)", en = "Disable SysMain (Superfetch)" }
+summary = { pt = "Menos uso de disco no meio do jogo, principalmente em HD.", en = "Less disk usage mid-game, especially on hard drives." }
+description = { pt = "Em SSD, o pré-carregamento de apps traz pouco ganho e causa picos de uso de disco e CPU no meio do jogo.", en = "On SSDs, app preloading brings little benefit and causes disk/CPU spikes mid-game." }
+warning = { pt = "Apps podem abrir um pouco mais devagar na primeira vez.", en = "Apps may open slightly slower the first time." }
+requires = { ssd = true }
+[[tweak.service]]
+name = "SysMain"
+start = "disabled"
+
+[[tweak]]
+id = "driver-updates-off"
+category = "system"
+risk = "moderate"
+title = { pt = "Windows Update não troca seus drivers", en = "Windows Update won't replace your drivers" }
+summary = { pt = "O Windows Update para de trocar seu driver de vídeo por um mais velho.", en = "Windows Update stops replacing your graphics driver with an older one." }
+description = { pt = "Evita que o Windows Update substitua o driver de vídeo que você instalou por uma versão antiga ou genérica.", en = "Stops Windows Update from replacing the GPU driver you installed with an old or generic version." }
+warning = { pt = "Atualize os drivers manualmente pelo site do fabricante.", en = "Update drivers manually from the vendor's site." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching"
+name = "SearchOrderConfig"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "ExcludeWUDriversInQualityUpdate"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "dynamic-tick-off"
+category = "system"
+risk = "advanced"
+restart = true
+title = { pt = "Desativar dynamic tick", en = "Disable dynamic tick" }
+summary = { pt = "Pode deixar o tempo entre quadros mais estável. Gasta mais energia.", en = "Can make frame times steadier. Uses more power." }
+description = { pt = "Mantém o timer do sistema sempre ativo, em vez de pausar em ociosidade. Pode deixar o frametime mais estável.", en = "Keeps the system timer ticking instead of pausing when idle. May steady frame times." }
+warning = { pt = "Aumenta o consumo de energia. Com BitLocker, a proteção é suspensa por 1 reinício para não pedir a chave de recuperação.", en = "Increases power draw. With BitLocker, protection is suspended for 1 reboot so it does not ask for the recovery key." }
+[[tweak.cmd]]
+key = "bcd"
+backup = '''
+function Get-CTBcd([uint32]$type) {
+  $st = (Invoke-CimMethod -Namespace root/wmi -ClassName BcdStore -MethodName OpenStore -Arguments @{ File = '' }).Store
+  $o = (Invoke-CimMethod -InputObject $st -MethodName OpenObject -Arguments @{ Id = '{fa926493-6f1c-4193-a414-58f0b2456d1e}' }).Object
+  if (-not $o) { throw 'não deu para ler a inicialização do Windows (BCD)' }
+  $types = @((Invoke-CimMethod -InputObject $o -MethodName EnumerateElementTypes).Types)
+  if ($types -notcontains $type) { return '__none__' }
+  $e = (Invoke-CimMethod -InputObject $o -MethodName GetElement -Arguments @{ Type = $type }).Element
+  if ($e.CimInstanceProperties['Boolean']) { if ($e.Boolean) { 'yes' } else { 'no' } } else { [string]$e.Integer }
+}
+Get-CTBcd 0x260000A5
+'''
+apply = '''
+$bl = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -ErrorAction SilentlyContinue |
+  Where-Object { $_.DriveLetter -eq $env:SystemDrive }
+if ($bl -and $bl.ProtectionStatus -eq 1) { manage-bde -protectors -disable $env:SystemDrive -RebootCount 1 | Out-Null }
+bcdedit /set disabledynamictick yes | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'bcdedit falhou' }
+'''
+verify = '''
+function Get-CTBcd([uint32]$type) {
+  $st = (Invoke-CimMethod -Namespace root/wmi -ClassName BcdStore -MethodName OpenStore -Arguments @{ File = '' }).Store
+  $o = (Invoke-CimMethod -InputObject $st -MethodName OpenObject -Arguments @{ Id = '{fa926493-6f1c-4193-a414-58f0b2456d1e}' }).Object
+  if (-not $o) { throw 'não deu para ler a inicialização do Windows (BCD)' }
+  $types = @((Invoke-CimMethod -InputObject $o -MethodName EnumerateElementTypes).Types)
+  if ($types -notcontains $type) { return '__none__' }
+  $e = (Invoke-CimMethod -InputObject $o -MethodName GetElement -Arguments @{ Type = $type }).Element
+  if ($e.CimInstanceProperties['Boolean']) { if ($e.Boolean) { 'yes' } else { 'no' } } else { [string]$e.Integer }
+}
+if ((Get-CTBcd 0x260000A5) -eq 'yes') { 'ok' } else { 'a inicialização do Windows não ficou com a mudança' }
+'''
+revert = '''
+$bl = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -ErrorAction SilentlyContinue |
+  Where-Object { $_.DriveLetter -eq $env:SystemDrive }
+if ($bl -and $bl.ProtectionStatus -eq 1) { manage-bde -protectors -disable $env:SystemDrive -RebootCount 1 | Out-Null }
+if ($env:NTOSKRNL_BACKUP -ne 'yes') { bcdedit /deletevalue disabledynamictick | Out-Null }
+'''
+
+[[tweak]]
+id = "platform-tick"
+category = "system"
+risk = "advanced"
+restart = true
+title = { pt = "Usar o relógio da placa-mãe (platform tick)", en = "Use the platform clock (platform tick)" }
+summary = { pt = "Em alguns PCs o tempo entre quadros fica mais regular. Em outros piora: meça antes.", en = "On some PCs frame times get more regular. On others it gets worse: measure first." }
+description = { pt = "O timer do sistema passa a vir do relógio da placa-mãe, em vez de um relógio sintético do processador. Em alguns PCs deixa o frametime mais regular; combina com \"Desativar dynamic tick\".", en = "The system timer comes from the motherboard clock instead of a synthetic CPU clock. On some PCs it makes frame times more regular; pairs with \"Disable dynamic tick\"." }
+warning = { pt = "O efeito muda de PC para PC: em alguns a latência piora. Meça antes e depois (Teste de latência) e reverta se piorar. Com BitLocker, a proteção é suspensa por 1 reinício.", en = "The effect varies by PC: on some, latency gets worse. Measure before and after (Latency test) and revert if it does. With BitLocker, protection is suspended for 1 reboot." }
+[[tweak.cmd]]
+key = "bcd"
+backup = '''
+function Get-CTBcd([uint32]$type) {
+  $st = (Invoke-CimMethod -Namespace root/wmi -ClassName BcdStore -MethodName OpenStore -Arguments @{ File = '' }).Store
+  $o = (Invoke-CimMethod -InputObject $st -MethodName OpenObject -Arguments @{ Id = '{fa926493-6f1c-4193-a414-58f0b2456d1e}' }).Object
+  if (-not $o) { throw 'não deu para ler a inicialização do Windows (BCD)' }
+  $types = @((Invoke-CimMethod -InputObject $o -MethodName EnumerateElementTypes).Types)
+  if ($types -notcontains $type) { return '__none__' }
+  $e = (Invoke-CimMethod -InputObject $o -MethodName GetElement -Arguments @{ Type = $type }).Element
+  if ($e.CimInstanceProperties['Boolean']) { if ($e.Boolean) { 'yes' } else { 'no' } } else { [string]$e.Integer }
+}
+Get-CTBcd 0x260000A4
+'''
+apply = '''
+$bl = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -ErrorAction SilentlyContinue |
+  Where-Object { $_.DriveLetter -eq $env:SystemDrive }
+if ($bl -and $bl.ProtectionStatus -eq 1) { manage-bde -protectors -disable $env:SystemDrive -RebootCount 1 | Out-Null }
+bcdedit /set useplatformtick yes | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'bcdedit falhou' }
+'''
+verify = '''
+function Get-CTBcd([uint32]$type) {
+  $st = (Invoke-CimMethod -Namespace root/wmi -ClassName BcdStore -MethodName OpenStore -Arguments @{ File = '' }).Store
+  $o = (Invoke-CimMethod -InputObject $st -MethodName OpenObject -Arguments @{ Id = '{fa926493-6f1c-4193-a414-58f0b2456d1e}' }).Object
+  if (-not $o) { throw 'não deu para ler a inicialização do Windows (BCD)' }
+  $types = @((Invoke-CimMethod -InputObject $o -MethodName EnumerateElementTypes).Types)
+  if ($types -notcontains $type) { return '__none__' }
+  $e = (Invoke-CimMethod -InputObject $o -MethodName GetElement -Arguments @{ Type = $type }).Element
+  if ($e.CimInstanceProperties['Boolean']) { if ($e.Boolean) { 'yes' } else { 'no' } } else { [string]$e.Integer }
+}
+if ((Get-CTBcd 0x260000A4) -eq 'yes') { 'ok' } else { 'a inicialização do Windows não ficou com a mudança' }
+'''
+revert = '''
+$bl = Get-CimInstance -Namespace root/cimv2/Security/MicrosoftVolumeEncryption -ClassName Win32_EncryptableVolume -ErrorAction SilentlyContinue |
+  Where-Object { $_.DriveLetter -eq $env:SystemDrive }
+if ($bl -and $bl.ProtectionStatus -eq 1) { manage-bde -protectors -disable $env:SystemDrive -RebootCount 1 | Out-Null }
+if ($env:NTOSKRNL_BACKUP -ne 'yes') { bcdedit /deletevalue useplatformtick | Out-Null }
+'''
+
+[[tweak]]
+id = "widgets-off"
+category = "system"
+risk = "safe"
+restart = true
+title = { pt = "Desativar Widgets e notícias", en = "Disable Widgets and news" }
+summary = { pt = "Some o painel de notícias e clima, um programa a menos rodando.", en = "Removes the news and weather board, one less program running." }
+description = { pt = "Tira o painel de Widgets do Windows 11 e o processo que fica carregando notícias e clima em segundo plano. Política oficial do Windows (a mesma do Editor de Política).", en = "Removes the Windows 11 Widgets board and the process that keeps loading news and weather in the background. Official Windows policy (same as the Group Policy Editor)." }
+warning = { pt = "As Configurações podem mostrar \"Algumas configurações são gerenciadas pela sua organização\": é só o aviso de política, não há empresa nenhuma controlando o PC.", en = "Settings may show \"Some settings are managed by your organization\": it is just the policy notice, no company is controlling the PC." }
+requires = { min_build = 22000 }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Dsh"
+name = "AllowNewsAndInterests"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "edge-background-off"
+category = "system"
+risk = "safe"
+title = { pt = "Edge sem rodar em segundo plano", en = "Stop Edge running in the background" }
+summary = { pt = "O Edge para de ficar aberto escondido gastando RAM.", en = "Edge stops staying open in the background using RAM." }
+description = { pt = "O Edge para de abrir escondido junto com o Windows (Aumento de inicialização) e de continuar rodando depois de fechado. Libera algumas centenas de MB de RAM. O Edge continua funcionando normal quando você abre.", en = "Edge stops starting hidden with Windows (Startup boost) and stops running after you close it. Frees a few hundred MB of RAM. Edge still works normally when you open it." }
+warning = { pt = "O Edge passa a mostrar \"Seu navegador é gerenciado pela sua organização\": é o aviso de política, não há ninguém controlando o navegador.", en = "Edge will show \"Your browser is managed by your organization\": it is the policy notice, nobody is controlling the browser." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "StartupBoostEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "BackgroundModeEnabled"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "wu-no-auto-reboot"
+category = "system"
+risk = "safe"
+title = { pt = "Windows Update sem reiniciar sozinho", en = "No automatic Windows Update restarts" }
+summary = { pt = "O Windows não reinicia sozinho no meio da sua partida.", en = "Windows will not restart by itself in the middle of your match." }
+description = { pt = "Com alguém usando o PC, o Windows Update não reinicia sozinho para instalar atualizações (adeus reinício no meio da partida). Ele avisa e espera você reiniciar.", en = "While someone is signed in, Windows Update will not restart by itself to install updates (no more restarts mid-match). It notifies you and waits." }
+warning = { pt = "Lembre de reiniciar quando o Windows pedir: atualizações de segurança só valem depois disso.", en = "Remember to restart when Windows asks: security updates only apply after that." }
+requires = { not_home = true }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
+name = "NoAutoRebootWithLoggedOnUsers"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "search-index-games"
+category = "system"
+risk = "safe"
+title = { pt = "Pesquisa do Windows fora das pastas de jogos", en = "Keep Windows Search out of game folders" }
+summary = { pt = "A pesquisa do Windows para de ler os arquivos dos jogos.", en = "Windows Search stops reading your game files." }
+description = { pt = "Marca as bibliotecas da Steam e da Epic para o indexador não ler o conteúdo dos arquivos dos jogos (milhares de arquivos que ninguém pesquisa). Faz diferença com a pesquisa no modo Avançado, que indexa o PC inteiro, e principalmente em HD.", en = "Marks your Steam and Epic libraries so the indexer skips game file contents (thousands of files nobody searches). Matters with Enhanced search, which indexes the whole PC, especially on hard drives." }
+warning = { pt = "Pode levar alguns minutos em bibliotecas grandes.", en = "May take a few minutes on big libraries." }
+[[tweak.cmd]]
+key = "index"
+backup = '''
+function Get-CTGameLibs {
+  $libs = @()
+  $steam = (Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction SilentlyContinue).SteamPath
+  if ($steam) {
+    $vdf = Join-Path $steam 'steamapps\libraryfolders.vdf'
+    if (Test-Path $vdf) {
+      foreach ($m in (Select-String -Path $vdf -Pattern '"path"\s+"([^"]+)"')) { $libs += Join-Path ($m.Matches[0].Groups[1].Value -replace '\\\\', '\') 'steamapps\common' }
+    }
+  }
+  Get-ChildItem "$env:ProgramData\Epic\EpicGamesLauncher\Data\Manifests" -Filter '*.item' -ErrorAction SilentlyContinue | ForEach-Object {
+    try { $j = Get-Content $_.FullName -Raw | ConvertFrom-Json; if ($j.InstallLocation) { $libs += [string]$j.InstallLocation } } catch {}
+  }
+  @($libs | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique)
+}
+@(Get-CTGameLibs) | ConvertTo-Json -Compress
+'''
+apply = '''
+function Get-CTGameLibs {
+  $libs = @()
+  $steam = (Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction SilentlyContinue).SteamPath
+  if ($steam) {
+    $vdf = Join-Path $steam 'steamapps\libraryfolders.vdf'
+    if (Test-Path $vdf) {
+      foreach ($m in (Select-String -Path $vdf -Pattern '"path"\s+"([^"]+)"')) { $libs += Join-Path ($m.Matches[0].Groups[1].Value -replace '\\\\', '\') 'steamapps\common' }
+    }
+  }
+  Get-ChildItem "$env:ProgramData\Epic\EpicGamesLauncher\Data\Manifests" -Filter '*.item' -ErrorAction SilentlyContinue | ForEach-Object {
+    try { $j = Get-Content $_.FullName -Raw | ConvertFrom-Json; if ($j.InstallLocation) { $libs += [string]$j.InstallLocation } } catch {}
+  }
+  @($libs | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique)
+}
+foreach ($p in Get-CTGameLibs) { attrib +I "$p" /S /D 2>&1 | Out-Null }
+'''
+revert = '''
+if (-not $env:NTOSKRNL_BACKUP) { return }
+foreach ($p in @($env:NTOSKRNL_BACKUP | ConvertFrom-Json)) { if (Test-Path $p) { attrib -I "$p" /S /D 2>&1 | Out-Null } }
+'''
+
+[[tweak]]
+id = "audio-enhancements-off"
+category = "system"
+risk = "moderate"
+title = { pt = "Desativar efeitos de áudio do Windows", en = "Disable Windows audio enhancements" }
+summary = { pt = "Tira os efeitos de som do Windows, uma causa comum de travadinhas.", en = "Removes Windows sound effects, a common cause of stutter." }
+description = { pt = "Desliga os \"aprimoramentos de áudio\" (equalizador, som espacial do fabricante, loudness) nas saídas de som ativas. Eles processam todo o áudio e são uma causa comum de travadinhas no teste de latência.", en = "Turns off \"audio enhancements\" (equalizer, vendor spatial sound, loudness) on active outputs. They process all audio and are a common cause of stutter in the latency test." }
+warning = { pt = "Se você usa o equalizador ou o som 3D do fabricante (Realtek, Nahimic, Dolby), eles param de funcionar até reverter. O som falha por 1 segundo ao aplicar.", en = "If you use the vendor equalizer or 3D sound (Realtek, Nahimic, Dolby), they stop working until reverted. Audio drops for a second when applied." }
+[[tweak.cmd]]
+key = "sysfx"
+backup = '''
+$FX = '{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5'
+function Get-CTAudioFx {
+  Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render' -ErrorAction SilentlyContinue | ForEach-Object {
+    if ((Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DeviceState -ne 1) { return } # 1 = ativa
+    $fx = Join-Path $_.PSPath 'FxProperties'
+    if (Test-Path $fx) { [pscustomobject]@{ id = $_.PSChildName; fx = $fx } }
+  }
+}
+$o = @{}
+foreach ($e in Get-CTAudioFx) {
+  $v = (Get-ItemProperty $e.fx -Name $FX -ErrorAction SilentlyContinue).$FX
+  $o[$e.id] = if ($null -eq $v) { '__none__' } else { [string]$v }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$FX = '{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5'
+function Get-CTAudioFx {
+  Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render' -ErrorAction SilentlyContinue | ForEach-Object {
+    if ((Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DeviceState -ne 1) { return } # 1 = ativa
+    $fx = Join-Path $_.PSPath 'FxProperties'
+    if (Test-Path $fx) { [pscustomobject]@{ id = $_.PSChildName; fx = $fx } }
+  }
+}
+$ok = 0; $n = 0
+foreach ($e in Get-CTAudioFx) {
+  $n++
+  try { Set-ItemProperty $e.fx -Name $FX -Value 1 -Type DWord -ErrorAction Stop; $ok++ } catch {}
+}
+if ($n -gt 0 -and $ok -eq 0) { throw 'O Windows não deixou mudar os efeitos de áudio' }
+Restart-Service Audiosrv -Force -ErrorAction SilentlyContinue
+'''
+verify = '''
+$FX = '{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5'
+function Get-CTAudioFx {
+  Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render' -ErrorAction SilentlyContinue | ForEach-Object {
+    if ((Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DeviceState -ne 1) { return } # 1 = ativa
+    $fx = Join-Path $_.PSPath 'FxProperties'
+    if (Test-Path $fx) { [pscustomobject]@{ id = $_.PSChildName; fx = $fx } }
+  }
+}
+$all = @(Get-CTAudioFx)
+if (-not $all.Count -or @($all | Where-Object { (Get-ItemProperty $_.fx -Name $FX -ErrorAction SilentlyContinue).$FX -eq 1 }).Count) { 'ok' } else { 'o Windows não deixou mudar os efeitos de áudio' }
+'''
+revert = '''
+$FX = '{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5'
+function Get-CTAudioFx {
+  Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render' -ErrorAction SilentlyContinue | ForEach-Object {
+    if ((Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DeviceState -ne 1) { return } # 1 = ativa
+    $fx = Join-Path $_.PSPath 'FxProperties'
+    if (Test-Path $fx) { [pscustomobject]@{ id = $_.PSChildName; fx = $fx } }
+  }
+}
+if (-not $env:NTOSKRNL_BACKUP) { return }
+$b = $env:NTOSKRNL_BACKUP | ConvertFrom-Json
+foreach ($e in Get-CTAudioFx) {
+  $v = $b.($e.id)
+  if ($null -eq $v) { continue }
+  if ($v -eq '__none__') { Remove-ItemProperty $e.fx -Name $FX -ErrorAction SilentlyContinue }
+  else { Set-ItemProperty $e.fx -Name $FX -Value ([int]$v) -Type DWord -ErrorAction SilentlyContinue }
+}
+Restart-Service Audiosrv -Force -ErrorAction SilentlyContinue
+'''
+
+[[tweak]]
+id = "svchost-split"
+category = "system"
+risk = "moderate"
+restart = true
+title = { pt = "Agrupar os serviços do Windows (SvcHostSplitThresholdInKB)", en = "Group Windows services (SvcHostSplitThresholdInKB)" }
+summary = { pt = "Menos processos svchost e um pouco menos de RAM (bom para PC com 8 GB ou menos).", en = "Fewer svchost processes and a bit less RAM (good for PCs with 8 GB or less)." }
+description = { pt = "Desde o Windows 10 1703, com mais de 3,5 GB de RAM, cada serviço roda no seu próprio svchost.exe (são 80 a 120 processos). Com o limite igual à sua RAM, o Windows volta a juntar os serviços em poucos svchost: menos processos e um pouco menos de memória. Ajuda de verdade em PC com 8 GB ou menos; não muda o FPS.", en = "Since Windows 10 1703, with more than 3.5 GB of RAM, each service runs in its own svchost.exe (80 to 120 processes). With the threshold set to your RAM size, Windows groups services back into a few svchost: fewer processes and a bit less memory. Really helps on PCs with 8 GB or less; it does not change FPS." }
+warning = { pt = "Com os serviços juntos, se um deles travar, os outros do mesmo grupo caem junto (o Windows reinicia o grupo). Precisa reiniciar o PC.", en = "With services grouped, if one crashes the others in the same group go down with it (Windows restarts the group). Requires a restart." }
+[[tweak.cmd]]
+key = "svchostsplit"
+backup = '''
+$v = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name SvcHostSplitThresholdInKB -ErrorAction SilentlyContinue).SvcHostSplitThresholdInKB
+if ($null -eq $v) { '__none__' } else { [string]$v }
+'''
+apply = '''
+$kb = [int64]([math]::Ceiling((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) * 1048576)
+Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name SvcHostSplitThresholdInKB -Value $kb -Type DWord
+'''
+verify = '''
+$v = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name SvcHostSplitThresholdInKB -ErrorAction SilentlyContinue).SvcHostSplitThresholdInKB
+$ram = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1KB
+if ($v -ge $ram) { 'ok' } else { 'o Windows não aceitou o novo limite' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -match '^\d+$') { Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name SvcHostSplitThresholdInKB -Value ([int64]$env:NTOSKRNL_BACKUP) -Type DWord }
+else { Remove-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name SvcHostSplitThresholdInKB -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "gpedit-home"
+category = "system"
+risk = "safe"
+title = { pt = "Ativar o Editor de Política de Grupo (gpedit.msc) no Windows Home", en = "Enable the Group Policy Editor (gpedit.msc) on Windows Home" }
+summary = { pt = "O Windows Home ganha o Editor de Política de Grupo (gpedit.msc).", en = "Windows Home gets the Group Policy Editor (gpedit.msc)." }
+description = { pt = "O Windows Home traz os arquivos do gpedit guardados mas não instala. O app instala os dois pacotes do próprio Windows (GroupPolicy ClientTools e ClientExtensions) pelo DISM, sem baixar nada. Depois é só abrir \"gpedit.msc\" no Executar. As otimizações de política do app (telemetria, Windows Update, Delivery Optimization) aparecem lá também, porque gravam nas mesmas chaves.", en = "Windows Home ships the gpedit files but does not install them. The app installs the two Windows packages (GroupPolicy ClientTools and ClientExtensions) with DISM, without downloading anything. Then just open \"gpedit.msc\" from Run. The app policy optimizations (telemetry, Windows Update, Delivery Optimization) show up there too, since they write to the same keys." }
+warning = { pt = "Leva de 2 a 5 minutos. Nem toda política do gpedit funciona no Home: o Windows ignora as que são exclusivas do Pro.", en = "Takes 2 to 5 minutes. Not every gpedit policy works on Home: Windows ignores the Pro-only ones." }
+requires = { home_only = true }
+[[tweak.cmd]]
+key = "gpedit"
+backup = '''
+if (Test-Path "$env:WINDIR\System32\gpedit.msc") { 'had' } else { 'none' }
+'''
+apply = '''
+if (Test-Path "$env:WINDIR\System32\gpedit.msc") { return }
+$pk = @(Get-ChildItem "$env:WINDIR\servicing\Packages" -Filter 'Microsoft-Windows-GroupPolicy-Client*-Package~*.mum' -ErrorAction SilentlyContinue)
+if (-not $pk.Count) { throw 'os pacotes do gpedit não estão neste Windows' }
+foreach ($p in $pk) { dism.exe /Online /NoRestart /Quiet /Add-Package /PackagePath:"$($p.FullName)" | Out-Null }
+'''
+verify = '''
+if (Test-Path "$env:WINDIR\System32\gpedit.msc") { 'ok' } else { 'o DISM não instalou o gpedit (atualização pendente? reinicie e tente de novo)' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -eq 'none') {
+  Get-WindowsPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.PackageName -like 'Microsoft-Windows-GroupPolicy-Client*' } | ForEach-Object { Remove-WindowsPackage -Online -PackageName $_.PackageName -NoRestart -ErrorAction SilentlyContinue | Out-Null }
+}
+'''
+timeout_secs = 900
+
+[[tweak]]
+id = "reserved-storage-off"
+category = "system"
+risk = "moderate"
+title = { pt = "Liberar o armazenamento reservado do Windows", en = "Free Windows reserved storage" }
+summary = { pt = "Uns 7 GB a mais livres no disco C:.", en = "About 7 GB more free on drive C:." }
+description = { pt = "O Windows separa cerca de 7 GB do disco C: para as próximas atualizações, mesmo sem usar. Desligando, esse espaço volta para você. As atualizações continuam funcionando (só precisam de espaço livre na hora).", en = "Windows sets aside about 7 GB of drive C: for future updates, even unused. Turning it off gives that space back. Updates keep working (they just need free space at the time)." }
+warning = { pt = "Se o disco C: estiver quase cheio, uma atualização grande pode falhar por falta de espaço. Não dá para mudar enquanto uma atualização está pendente: reinicie e tente de novo.", en = "If drive C: is nearly full, a big update may fail for lack of space. It cannot be changed while an update is pending: restart and try again." }
+requires = { min_build = 18362 }
+[[tweak.cmd]]
+key = "reserved"
+apply = '''
+dism.exe /Online /Set-ReservedStorageState /State:Disabled /Quiet /NoRestart | Out-Null
+'''
+verify = '''
+$s = [string](Get-WindowsReservedStorageState -ErrorAction SilentlyContinue).ReservedStorageState
+if ($s -eq 'Disabled') { 'ok' } elseif ($s) { 'o Windows não deixou mudar agora (atualização pendente?): reinicie e tente de novo' } else { 'ok' }
+'''
+revert = '''
+dism.exe /Online /Set-ReservedStorageState /State:Enabled /Quiet /NoRestart | Out-Null
+'''
+timeout_secs = 600
+
+[[tweak]]
+id = "compact-os"
+category = "system"
+risk = "moderate"
+title = { pt = "Compactar os arquivos do Windows (CompactOS)", en = "Compress Windows files (CompactOS)" }
+summary = { pt = "De 2 a 5 GB a mais livres no disco C: (bom para SSD pequeno).", en = "2 to 5 GB more free on drive C: (good for small SSDs)." }
+description = { pt = "Compacta os arquivos do próprio Windows e dos apps do sistema, do mesmo jeito que os PCs com SSD pequeno vêm de fábrica. Libera de 2 a 5 GB no disco C:. Vale para SSD de 256 GB ou menos; em disco grande, deixe como está.", en = "Compresses the files of Windows itself and system apps, the same way PCs with small SSDs ship from the factory. Frees 2 to 5 GB on drive C:. Worth it on SSDs of 256 GB or less; on a big drive, leave it as is." }
+warning = { pt = "Leva de 5 a 20 minutos. Abrir programas do Windows usa um pouco mais de processador para descompactar (imperceptível em PC moderno; evite em HD mecânico e processador muito antigo).", en = "Takes 5 to 20 minutes. Opening Windows programs uses a bit more CPU to decompress (unnoticeable on modern PCs; avoid on hard drives and very old processors)." }
+requires = { ssd = true }
+[[tweak.cmd]]
+key = "compactos"
+apply = '''
+compact.exe /CompactOS:always | Out-Null
+'''
+verify = '''
+Add-Type -Namespace CT -Name Fs -MemberDefinition '[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] public static extern uint GetCompressedFileSizeW(string f, out uint high);'
+$f = Join-Path $env:WINDIR 'System32\ntdll.dll'
+$h = [uint32]0
+$disk = [CT.Fs]::GetCompressedFileSizeW($f, [ref]$h)
+if ($disk -lt (Get-Item $f).Length) { 'ok' } else { 'o Windows não compactou os arquivos do sistema' }
+'''
+revert = '''
+compact.exe /CompactOS:never | Out-Null
+'''
+timeout_secs = 3600
+
+[[tweak]]
+id = "ntfs-8dot3-off"
+category = "system"
+risk = "safe"
+restart = true
+title = { pt = "Desativar nomes curtos 8.3 do NTFS", en = "Disable NTFS 8.3 short names" }
+summary = { pt = "Criar arquivos fica um pouco mais rápido, principalmente em HD.", en = "Creating files gets slightly faster, mostly on hard drives." }
+description = { pt = "O Windows para de criar um segundo nome curto (estilo PROGRA~1) para cada arquivo novo. Deixa a criação de arquivos um pouco mais rápida em pastas com muitos arquivos, principalmente em HD. Os nomes que já existem continuam.", en = "Windows stops creating a second short name (PROGRA~1 style) for every new file. Makes file creation slightly faster in folders with many files, mostly on hard drives. Existing names stay." }
+warning = { pt = "Programas muito antigos (da época do Windows 98) podem estranhar.", en = "Very old programs (Windows 98 era) may misbehave." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem"
+name = "NtfsDisable8dot3NameCreation"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "nagle-off"
+category = "network"
+risk = "safe"
+title = { pt = "Desativar algoritmo de Nagle", en = "Disable Nagle's algorithm" }
+summary = { pt = "Pacotes pequenos dos jogos saem na hora, sem esperar.", en = "Small game packets go out right away, without waiting." }
+description = { pt = "Envia pacotes pequenos na hora, sem agrupar. Reduz o atraso de rede em jogos que usam TCP (ex.: LoL, WoW, Minecraft).", en = "Sends small packets right away instead of batching. Lowers network delay in TCP games (e.g. LoL, WoW, Minecraft)." }
+[[tweak.cmd]]
+key = "nagle"
+backup = '''
+$root = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces'
+$o = @{}
+Get-ChildItem $root | ForEach-Object {
+  $p = Get-ItemProperty $_.PSPath
+  $o[$_.PSChildName] = @{ a = $p.TcpAckFrequency; n = $p.TCPNoDelay }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces' | ForEach-Object {
+  Set-ItemProperty -Path $_.PSPath -Name TcpAckFrequency -Value 1 -Type DWord
+  Set-ItemProperty -Path $_.PSPath -Name TCPNoDelay -Value 1 -Type DWord
+}
+'''
+verify = '''
+$bad = @(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces' | Where-Object { $p = Get-ItemProperty $_.PSPath; $p.TcpAckFrequency -ne 1 -or $p.TCPNoDelay -ne 1 })
+if ($bad.Count) { 'nem todas as interfaces de rede aceitaram' } else { 'ok' }
+'''
+revert = '''
+$root = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces'
+$b = @{}
+if ($env:NTOSKRNL_BACKUP) { ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object { $b[$_.Name] = $_.Value } }
+Get-ChildItem $root | ForEach-Object {
+  $orig = $b[$_.PSChildName]
+  foreach ($pair in @(@('TcpAckFrequency', 'a'), @('TCPNoDelay', 'n'))) {
+    $v = if ($orig) { $orig.($pair[1]) } else { $null }
+    if ($null -eq $v) { Remove-ItemProperty -Path $_.PSPath -Name $pair[0] -ErrorAction SilentlyContinue }
+    else { Set-ItemProperty -Path $_.PSPath -Name $pair[0] -Value $v -Type DWord }
+  }
+}
+'''
+
+[[tweak]]
+id = "delivery-optimization-off"
+category = "network"
+risk = "safe"
+title = { pt = "Desativar compartilhamento P2P de updates", en = "Disable P2P update sharing" }
+summary = { pt = "Seu PC para de enviar atualizações do Windows para outros PCs pela internet.", en = "Your PC stops uploading Windows updates to other PCs over the internet." }
+description = { pt = "Impede o Windows de usar sua internet para enviar atualizações a outros PCs. Evita picos de upload e ping alto.", en = "Stops Windows from using your connection to upload updates to other PCs. Avoids upload spikes and ping jumps." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization"
+name = "DODownloadMode"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "nic-power-saving-off"
+category = "network"
+risk = "safe"
+title = { pt = "Placa de rede sem economia de energia", en = "Network card without power saving" }
+summary = { pt = "A internet com cabo não \"cochila\" para economizar energia.", en = "Wired internet does not \"doze off\" to save power." }
+description = { pt = "Desliga o Ethernet \"verde\" (EEE/Green Ethernet) e a suspensão da placa. Ela para de \"cochilar\" entre pacotes, o que causa picos de ping. A internet cai por alguns segundos ao aplicar.", en = "Turns off \"green\" Ethernet (EEE/Green Ethernet) and adapter suspend. The card stops dozing between packets, which causes ping spikes. Internet drops for a few seconds when applied." }
+[[tweak.cmd]]
+key = "nicpower"
+backup = '''
+$o = @{}
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*EEE','0'),@('EEE','0'),@('AdvancedEEE','0'),@('GreenEthernet','0'),@('EnableGreenEthernet','0'),@('*SelectiveSuspend','0'),@('PowerSavingMode','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p) { $o["$a|$($kv[0])"] = [string]($p.RegistryValue | Select-Object -First 1) }
+  }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$changed = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*EEE','0'),@('EEE','0'),@('AdvancedEEE','0'),@('GreenEthernet','0'),@('EnableGreenEthernet','0'),@('*SelectiveSuspend','0'),@('PowerSavingMode','0'))) {
+    if (Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue) {
+      Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -RegistryValue $kv[1] -NoRestart -ErrorAction SilentlyContinue
+      $changed += $a
+    }
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+verify = '''
+$bad = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*EEE','0'),@('EEE','0'),@('AdvancedEEE','0'),@('GreenEthernet','0'),@('EnableGreenEthernet','0'),@('*SelectiveSuspend','0'),@('PowerSavingMode','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p -and [string]($p.RegistryValue | Select-Object -First 1) -ne $kv[1]) { $bad += "$a ($($kv[0]))" }
+  }
+}
+if ($bad.Count) { 'a placa de rede não aceitou: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+$changed = @()
+if ($env:NTOSKRNL_BACKUP) {
+  ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+    $a, $k = $_.Name -split '\|', 2
+    Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $k -RegistryValue $_.Value -NoRestart -ErrorAction SilentlyContinue
+    $changed += $a
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "nic-interrupt-moderation-off"
+category = "network"
+risk = "moderate"
+title = { pt = "Entrega imediata de pacotes (Interrupt Moderation)", en = "Immediate packet delivery (Interrupt Moderation)" }
+summary = { pt = "A placa de rede entrega cada pacote na hora: menos atraso, um pouco mais de processador.", en = "The network card delivers each packet right away: less delay, a bit more CPU." }
+description = { pt = "A placa avisa o processador a cada pacote em vez de juntar vários. Menos atraso de entrada na rede, com um pouco mais de uso de CPU. A internet cai por alguns segundos ao aplicar.", en = "The card notifies the CPU on every packet instead of batching them. Less network input delay, slightly more CPU use. Internet drops for a few seconds when applied." }
+[[tweak.cmd]]
+key = "nicirq"
+backup = '''
+$o = @{}
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*InterruptModeration','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p) { $o["$a|$($kv[0])"] = [string]($p.RegistryValue | Select-Object -First 1) }
+  }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$changed = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*InterruptModeration','0'))) {
+    if (Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue) {
+      Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -RegistryValue $kv[1] -NoRestart -ErrorAction SilentlyContinue
+      $changed += $a
+    }
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+verify = '''
+$bad = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*InterruptModeration','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p -and [string]($p.RegistryValue | Select-Object -First 1) -ne $kv[1]) { $bad += "$a ($($kv[0]))" }
+  }
+}
+if ($bad.Count) { 'a placa de rede não aceitou: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+$changed = @()
+if ($env:NTOSKRNL_BACKUP) {
+  ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+    $a, $k = $_.Name -split '\|', 2
+    Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $k -RegistryValue $_.Value -NoRestart -ErrorAction SilentlyContinue
+    $changed += $a
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "nic-flow-control-off"
+category = "network"
+risk = "moderate"
+title = { pt = "Desativar controle de fluxo", en = "Disable flow control" }
+summary = { pt = "A placa de rede não pausa o envio quando a rede está cheia.", en = "The network card does not pause sending when the network is busy." }
+description = { pt = "Impede o roteador de mandar a placa \"pausar\" o envio quando a rede enche, o que gera travadas curtas no jogo. A internet cai por alguns segundos ao aplicar.", en = "Stops the router from telling the card to \"pause\" sending when the network is busy, which causes short in-game hitches. Internet drops for a few seconds when applied." }
+[[tweak.cmd]]
+key = "nicflow"
+backup = '''
+$o = @{}
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*FlowControl','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p) { $o["$a|$($kv[0])"] = [string]($p.RegistryValue | Select-Object -First 1) }
+  }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$changed = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*FlowControl','0'))) {
+    if (Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue) {
+      Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -RegistryValue $kv[1] -NoRestart -ErrorAction SilentlyContinue
+      $changed += $a
+    }
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+verify = '''
+$bad = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*FlowControl','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p -and [string]($p.RegistryValue | Select-Object -First 1) -ne $kv[1]) { $bad += "$a ($($kv[0]))" }
+  }
+}
+if ($bad.Count) { 'a placa de rede não aceitou: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+$changed = @()
+if ($env:NTOSKRNL_BACKUP) {
+  ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+    $a, $k = $_.Name -split '\|', 2
+    Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $k -RegistryValue $_.Value -NoRestart -ErrorAction SilentlyContinue
+    $changed += $a
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "nic-lso-off"
+category = "network"
+risk = "moderate"
+title = { pt = "Desativar Large Send Offload", en = "Disable Large Send Offload" }
+summary = { pt = "O Windows monta os pacotes em vez da placa de rede: evita atraso em algumas placas.", en = "Windows builds the packets instead of the network card: avoids delay on some cards." }
+description = { pt = "A placa deixa de segurar dados para mandar em blocos grandes. Os pacotes do jogo saem na hora, sem esperar atrás de um download. A internet cai por alguns segundos ao aplicar.", en = "The card stops holding data to send in big chunks. Game packets go out right away instead of waiting behind a download. Internet drops for a few seconds when applied." }
+[[tweak.cmd]]
+key = "niclso"
+backup = '''
+$o = @{}
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*LsoV2IPv4','0'),@('*LsoV2IPv6','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p) { $o["$a|$($kv[0])"] = [string]($p.RegistryValue | Select-Object -First 1) }
+  }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$changed = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*LsoV2IPv4','0'),@('*LsoV2IPv6','0'))) {
+    if (Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue) {
+      Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -RegistryValue $kv[1] -NoRestart -ErrorAction SilentlyContinue
+      $changed += $a
+    }
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+verify = '''
+$bad = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*LsoV2IPv4','0'),@('*LsoV2IPv6','0'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p -and [string]($p.RegistryValue | Select-Object -First 1) -ne $kv[1]) { $bad += "$a ($($kv[0]))" }
+  }
+}
+if ($bad.Count) { 'a placa de rede não aceitou: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+$changed = @()
+if ($env:NTOSKRNL_BACKUP) {
+  ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+    $a, $k = $_.Name -split '\|', 2
+    Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $k -RegistryValue $_.Value -NoRestart -ErrorAction SilentlyContinue
+    $changed += $a
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "nic-rss-on"
+category = "network"
+risk = "moderate"
+title = { pt = "Ligar o RSS da placa de rede", en = "Turn on network card RSS" }
+summary = { pt = "A placa de rede usa vários núcleos para receber os pacotes, não só um.", en = "The network card uses several cores to receive packets, not just one." }
+description = { pt = "Receive Side Scaling: os pacotes que chegam são atendidos por vários núcleos em vez de um só. Algumas placas (Realtek, Killer) vêm com ele desligado, e aí um núcleo fica sobrecarregado em downloads e partidas. Se já estiver ligado, nada muda. A internet cai por alguns segundos ao aplicar.", en = "Receive Side Scaling: incoming packets are handled by several cores instead of one. Some cards (Realtek, Killer) ship with it off, overloading one core during downloads and matches. If it is already on, nothing changes. Internet drops for a few seconds when applied." }
+[[tweak.cmd]]
+key = "nicrss"
+backup = '''
+$o = @{}
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*RSS','1'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p) { $o["$a|$($kv[0])"] = [string]($p.RegistryValue | Select-Object -First 1) }
+  }
+}
+$o | ConvertTo-Json -Compress
+'''
+apply = '''
+$changed = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*RSS','1'))) {
+    if (Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue) {
+      Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -RegistryValue $kv[1] -NoRestart -ErrorAction SilentlyContinue
+      $changed += $a
+    }
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+verify = '''
+$bad = @()
+Get-NetAdapter -Physical -ErrorAction SilentlyContinue | ForEach-Object {
+  $a = $_.Name
+  foreach ($kv in @(@('*RSS','1'))) {
+    $p = Get-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $kv[0] -ErrorAction SilentlyContinue
+    if ($p -and [string]($p.RegistryValue | Select-Object -First 1) -ne $kv[1]) { $bad += "$a ($($kv[0]))" }
+  }
+}
+if ($bad.Count) { 'a placa de rede não aceitou: ' + ($bad -join ', ') } else { 'ok' }
+'''
+revert = '''
+$changed = @()
+if ($env:NTOSKRNL_BACKUP) {
+  ($env:NTOSKRNL_BACKUP | ConvertFrom-Json).PSObject.Properties | ForEach-Object {
+    $a, $k = $_.Name -split '\|', 2
+    Set-NetAdapterAdvancedProperty -Name $a -RegistryKeyword $k -RegistryValue $_.Value -NoRestart -ErrorAction SilentlyContinue
+    $changed += $a
+  }
+}
+$changed | Select-Object -Unique | ForEach-Object { Restart-NetAdapter -Name $_ -Confirm:$false -ErrorAction SilentlyContinue }
+'''
+
+[[tweak]]
+id = "wifi-max-performance"
+category = "network"
+risk = "safe"
+title = { pt = "Wi-Fi em desempenho máximo", en = "Wi-Fi at maximum performance" }
+summary = { pt = "O Wi-Fi não economiza energia na tomada: ping mais estável.", en = "Wi-Fi does not save power when plugged in: steadier ping." }
+description = { pt = "Desliga a economia de energia do adaptador Wi-Fi na tomada. Em notebooks, é uma das maiores causas de ping oscilando. Não faz nada em PC só com cabo.", en = "Turns off Wi-Fi adapter power saving on AC power. On laptops it is one of the biggest causes of jumpy ping. Does nothing on cable-only PCs." }
+[[tweak.cmd]]
+key = "wifips"
+backup = '''
+$q = powercfg /query SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 2>$null | Out-String
+$m = [regex]::Matches($q, '0x([0-9a-fA-F]{8})')
+if ($m.Count -ge 2) { [Convert]::ToInt32($m[$m.Count - 2].Groups[1].Value, 16) }
+'''
+apply = '''
+powercfg /setacvalueindex SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 0 | Out-Null
+powercfg /setactive SCHEME_CURRENT | Out-Null
+'''
+verify = '''
+$h = [regex]::Matches(((powercfg /q SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 2>$null) -join ' '), '0x([0-9a-fA-F]{8})')
+if ($h.Count -eq 0 -or [Convert]::ToInt32($h[0].Groups[1].Value, 16) -eq 0) { 'ok' } else { 'o plano de energia não aceitou' }
+'''
+revert = '''
+$v = if ($env:NTOSKRNL_BACKUP -match '^\d+$') { $env:NTOSKRNL_BACKUP } else { '0' }
+powercfg /setacvalueindex SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a $v | Out-Null
+powercfg /setactive SCHEME_CURRENT | Out-Null
+'''
+
+[[tweak]]
+id = "prefer-ipv4"
+category = "network"
+risk = "safe"
+title = { pt = "Preferir IPv4 quando o IPv6 do provedor é pior", en = "Prefer IPv4 when the ISP IPv6 is worse" }
+summary = { pt = "Ping menor quando o IPv6 do seu provedor faz uma rota pior.", en = "Lower ping when your ISP IPv6 takes a worse route." }
+description = { pt = "Quando um site ou jogo tem os dois caminhos, o Windows passa a escolher o IPv4. Em vários provedores o IPv6 faz uma rota mais longa e o ping fica maior. O IPv6 continua ligado.", en = "When a site or game offers both paths, Windows picks IPv4 first. With several ISPs, IPv6 takes a longer route and ping goes up. IPv6 stays on." }
+[[tweak.cmd]]
+key = "prefixpolicy"
+backup = '''
+[int](Get-NetPrefixPolicy -ErrorAction SilentlyContinue | Where-Object Prefix -eq '::ffff:0:0/96' | Select-Object -First 1).Precedence
+'''
+apply = '''
+netsh interface ipv6 set prefixpolicy prefix=::ffff:0:0/96 precedence=60 label=4 store=persistent | Out-Null
+'''
+verify = '''
+$p = (Get-NetPrefixPolicy -ErrorAction SilentlyContinue | Where-Object Prefix -eq '::ffff:0:0/96' | Select-Object -First 1).Precedence
+if ($p -gt 40) { 'ok' } else { 'o Windows não aceitou a nova preferência' }
+'''
+revert = '''
+$p = if ($env:NTOSKRNL_BACKUP -match '^\d+$' -and [int]$env:NTOSKRNL_BACKUP -gt 0) { $env:NTOSKRNL_BACKUP } else { '35' }
+netsh interface ipv6 set prefixpolicy prefix=::ffff:0:0/96 precedence=$p label=4 store=persistent | Out-Null
+'''
+
+[[tweak]]
+id = "rsc-off"
+category = "network"
+risk = "moderate"
+title = { pt = "Desativar a junção de pacotes recebidos (RSC)", en = "Disable Receive Segment Coalescing (RSC)" }
+summary = { pt = "Os pacotes do jogo chegam sem esperar ser agrupados.", en = "Game packets arrive without waiting to be grouped." }
+description = { pt = "O Windows deixa de juntar pacotes recebidos antes de entregar ao jogo. Isso economiza processador em downloads grandes, mas pode segurar pacotes de jogo por um instante.", en = "Windows stops merging received packets before handing them to the game. Merging saves CPU on big downloads but can hold game packets back for a moment." }
+warning = { pt = "Downloads muito rápidos (1 Gbps ou mais) podem usar um pouco mais de processador.", en = "Very fast downloads (1 Gbps+) may use a bit more CPU." }
+[[tweak.cmd]]
+key = "rsc"
+backup = '''
+[string](Get-NetOffloadGlobalSetting).ReceiveSegmentCoalescing
+'''
+apply = '''
+Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing Disabled
+'''
+verify = '''
+if ([string](Get-NetOffloadGlobalSetting).ReceiveSegmentCoalescing -eq 'Disabled') { 'ok' } else { 'a rede não aceitou' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -in 'Enabled', 'Disabled') { Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing $env:NTOSKRNL_BACKUP }
+'''
+
+[[tweak]]
+id = "telemetry-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Reduzir telemetria", en = "Reduce telemetry" }
+summary = { pt = "O Windows envia menos dados de uso para a Microsoft.", en = "Windows sends less usage data to Microsoft." }
+description = { pt = "Desliga o serviço de telemetria (DiagTrack) e reduz a coleta de diagnóstico ao mínimo que sua edição do Windows permite.", en = "Disables the telemetry service (DiagTrack) and reduces diagnostic collection to the minimum your Windows edition allows." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection"
+name = "AllowTelemetry"
+type = "REG_DWORD"
+value = 0
+[[tweak.service]]
+name = "DiagTrack"
+start = "disabled"
+[[tweak.service]]
+name = "dmwappushservice"
+start = "disabled"
+
+[[tweak]]
+id = "ads-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Sem anúncios e sugestões", en = "No ads and suggestions" }
+summary = { pt = "Some com propagandas e apps sugeridos no Iniciar e nas Configurações.", en = "Removes ads and suggested apps in Start and Settings." }
+description = { pt = "Desativa o ID de anúncio, as sugestões no menu Iniciar e a instalação silenciosa de apps patrocinados.", en = "Disables the advertising ID, Start menu suggestions and silent install of sponsored apps." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo"
+name = "Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SystemPaneSuggestionsEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338388Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338389Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SilentInstalledAppsEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "Start_IrisRecommendations"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "web-search-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Busca do Iniciar sem Bing", en = "Start search without Bing" }
+summary = { pt = "A busca do Iniciar procura só no PC, sem abrir resultados do Bing.", en = "Start search looks only on your PC, without Bing results." }
+description = { pt = "A busca do Windows procura só no seu PC: mais rápida e sem enviar o que você digita para a internet.", en = "Windows search only looks on your PC: faster and without sending what you type online." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Search"
+name = "BingSearchEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer"
+name = "DisableSearchBoxSuggestions"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search"
+name = "AllowCortana"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "activity-history-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Desativar histórico de atividades", en = "Disable activity history" }
+summary = { pt = "O Windows para de guardar o histórico do que você abre.", en = "Windows stops keeping a history of what you open." }
+description = { pt = "O Windows deixa de registrar quais apps e arquivos você abre.", en = "Windows stops recording which apps and files you open." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "EnableActivityFeed"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "PublishUserActivities"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "UploadUserActivities"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "copilot-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Desativar o Copilot", en = "Disable Copilot" }
+summary = { pt = "Tira o Copilot da barra de tarefas e do Windows.", en = "Removes Copilot from the taskbar and Windows." }
+description = { pt = "Tira o botão do Copilot da barra de tarefas e bloqueia o Copilot integrado ao Windows. Nas versões em que ele virou um app comum, remova-o na aba Debloat.", en = "Removes the Copilot button from the taskbar and blocks the Copilot built into Windows. On versions where it became a regular app, remove it in the Debloat tab." }
+requires = { min_build = 22000 }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot"
+name = "TurnOffWindowsCopilot"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot"
+name = "TurnOffWindowsCopilot"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "ShowCopilotButton"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "recall-off"
+category = "privacy"
+risk = "safe"
+restart = true
+title = { pt = "Desativar o Recall", en = "Disable Recall" }
+summary = { pt = "O Windows para de tirar prints da sua tela a cada poucos segundos.", en = "Windows stops taking screenshots of your screen every few seconds." }
+description = { pt = "O Recall deixa de tirar prints da sua tela a cada poucos segundos (ele só existe em PCs Copilot+). Os prints já salvos podem ser apagados em Configurações → Privacidade → Recall.", en = "Recall stops taking screenshots of your screen every few seconds (it only exists on Copilot+ PCs). Screenshots already saved can be deleted in Settings → Privacy → Recall." }
+requires = { min_build = 26100 }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI"
+name = "DisableAIDataAnalysis"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI"
+name = "DisableAIDataAnalysis"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "lockscreen-tips-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Sem dicas e propagandas na tela de bloqueio", en = "No tips and ads on the lock screen" }
+summary = { pt = "Tela de bloqueio sem curiosidades e propagandas.", en = "Lock screen without tips and ads." }
+description = { pt = "Some com as curiosidades e propagandas da tela de bloqueio, as sugestões nas Configurações e os avisos de \"Vamos terminar de configurar seu PC\".", en = "Removes the fun facts and ads on the lock screen, the suggestions in Settings and the \"Let's finish setting up your PC\" prompts." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "RotatingLockScreenOverlayEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338387Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338393Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-353694Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-353696Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-310093Enabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SoftLandingEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement"
+name = "ScoobeSystemSettingEnabled"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "tailored-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Sem experiências personalizadas e pedidos de feedback", en = "No tailored experiences or feedback requests" }
+summary = { pt = "Menos pedidos de avaliação e sugestões \"personalizadas\".", en = "Fewer feedback requests and \"personalized\" suggestions." }
+description = { pt = "A Microsoft deixa de usar seus dados de diagnóstico para mostrar dicas e ofertas personalizadas, e o Windows para de pedir avaliações.", en = "Microsoft stops using your diagnostic data to show personalized tips and offers, and Windows stops asking for feedback." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Privacy"
+name = "TailoredExperiencesWithDiagnosticDataEnabled"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Siuf\\Rules"
+name = "NumberOfSIUFInPeriod"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection"
+name = "DoNotShowFeedbackNotifications"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "typing-data-off"
+category = "privacy"
+risk = "safe"
+title = { pt = "Não enviar o que você digita e escreve", en = "Do not send what you type and write" }
+summary = { pt = "O que você digita não é enviado para melhorar o teclado da Microsoft.", en = "What you type is not sent to improve Microsoft’s keyboard." }
+description = { pt = "O Windows deixa de coletar o que você digita e escreve à mão para \"melhorar\" o teclado e o reconhecimento de escrita.", en = "Windows stops collecting what you type and handwrite to \"improve\" the keyboard and handwriting recognition." }
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\InputPersonalization"
+name = "RestrictImplicitInkCollection"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\InputPersonalization"
+name = "RestrictImplicitTextCollection"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\InputPersonalization\\TrainedDataStore"
+name = "HarvestContacts"
+type = "REG_DWORD"
+value = 0
+[[tweak.reg]]
+path = "HKCU\\SOFTWARE\\Microsoft\\Personalization\\Settings"
+name = "AcceptedPrivacyPolicy"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "error-reporting-off"
+category = "services"
+risk = "safe"
+title = { pt = "Desativar Relatório de Erros", en = "Disable Error Reporting" }
+summary = { pt = "O Windows para de juntar e enviar relatórios de travamento.", en = "Windows stops collecting and sending crash reports." }
+description = { pt = "Quando um app trava, o Windows deixa de gerar e enviar relatórios em segundo plano.", en = "When an app crashes, Windows stops generating and uploading reports in the background." }
+[[tweak.service]]
+name = "WerSvc"
+start = "disabled"
+
+[[tweak]]
+id = "unused-services-off"
+category = "services"
+risk = "moderate"
+title = { pt = "Desativar serviços pouco usados", en = "Disable rarely used services" }
+summary = { pt = "Desliga serviços que quase ninguém usa (fax, mapas offline, modo loja).", en = "Turns off services almost nobody uses (fax, offline maps, store demo mode)." }
+description = { pt = "Mapas offline, modo demonstração de loja e fax ficam desligados.", en = "Offline maps, retail demo mode and fax are turned off." }
+warning = { pt = "Reverta se você usa fax ou mapas offline.", en = "Revert if you use fax or offline maps." }
+[[tweak.service]]
+name = "MapsBroker"
+start = "disabled"
+[[tweak.service]]
+name = "RetailDemo"
+start = "disabled"
+[[tweak.service]]
+name = "Fax"
+start = "disabled"
+
+[[tweak]]
+id = "ndu-off"
+category = "services"
+risk = "moderate"
+restart = true
+title = { pt = "Desativar monitor de uso de rede (Ndu)", en = "Disable network usage monitor (Ndu)" }
+summary = { pt = "Evita um vazamento de memória conhecido do Windows.", en = "Avoids a known Windows memory leak." }
+description = { pt = "O driver Ndu contabiliza o uso de rede por app e é conhecido por vazar memória do pool não paginado.", en = "The Ndu driver tracks per-app network usage and is known to leak non-paged pool memory." }
+warning = { pt = "A tela \"Uso de dados\" das Configurações deixa de mostrar o consumo por app.", en = "The Settings \"Data usage\" page stops showing per-app usage." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Ndu"
+name = "Start"
+type = "REG_DWORD"
+value = 4
+
+[[tweak]]
+id = "xbox-services-off"
+category = "services"
+risk = "moderate"
+title = { pt = "Desativar serviços da Xbox Live", en = "Disable Xbox Live services" }
+summary = { pt = "Serviços da Xbox Live param de rodar. Não use se joga pelo Game Pass.", en = "Xbox Live services stop running. Do not use if you play on Game Pass." }
+description = { pt = "Desliga o login, o salvamento na nuvem e a rede da Xbox Live, que a Xbox App e a Game Bar acordam em segundo plano. Os controles Xbox continuam funcionando.", en = "Disables Xbox Live sign-in, cloud saves and networking, which the Xbox app and Game Bar wake up in the background. Xbox controllers keep working." }
+warning = { pt = "Não aplique se você joga pelo Game Pass, pela Xbox App ou jogos da Microsoft Store com login Xbox (Forza, Halo, Minecraft da loja).", en = "Do not apply if you play through Game Pass, the Xbox app or Microsoft Store games with Xbox sign-in (Forza, Halo, Store Minecraft)." }
+[[tweak.service]]
+name = "XblAuthManager"
+start = "disabled"
+[[tweak.service]]
+name = "XblGameSave"
+start = "disabled"
+[[tweak.service]]
+name = "XboxNetApiSvc"
+start = "disabled"
+
+[[tweak]]
+id = "sec-firewall"
+category = "security"
+risk = "safe"
+title = { pt = "Firewall ligado em todas as redes", en = "Firewall on for every network" }
+description = { pt = "Liga o Firewall do Windows nas redes de domínio, privada e pública e bloqueia conexões de entrada que não têm regra. É a primeira barreira contra worms que se espalham pela rede.", en = "Turns Windows Firewall on for domain, private and public networks and blocks inbound connections without a rule. The first barrier against network worms." }
+[[tweak.cmd]]
+key = "fw"
+backup = '''
+(Get-NetFirewallProfile -ErrorAction Stop | ForEach-Object { '{0}={1}={2}' -f $_.Name, $_.Enabled, $_.DefaultInboundAction }) -join ';'
+'''
+apply = '''
+Set-NetFirewallProfile -All -Enabled True -DefaultInboundAction Block -ErrorAction Stop
+'''
+verify = '''
+if (@(Get-NetFirewallProfile | Where-Object { -not $_.Enabled }).Count) { 'o Firewall não ligou em todas as redes (outro firewall ou política)' } else { 'ok' }
+'''
+revert = '''
+foreach ($p in ($env:NTOSKRNL_BACKUP -split ';')) {
+  $n, $e, $d = $p -split '='
+  if ($n) { Set-NetFirewallProfile -Name $n -Enabled $e -DefaultInboundAction $d -ErrorAction Stop }
+}
+'''
+
+[[tweak]]
+id = "sec-smb1-off"
+category = "security"
+risk = "safe"
+title = { pt = "Desligar o SMBv1", en = "Turn off SMBv1" }
+description = { pt = "Protocolo de compartilhamento de arquivos de 1983, usado pelo WannaCry e pelo NotPetya para se espalhar. Nenhum PC atual precisa dele.", en = "A 1983 file-sharing protocol used by WannaCry and NotPetya to spread. No modern PC needs it." }
+warning = { pt = "Só reverta se você acessa um NAS ou impressora muito antigos pela rede.", en = "Only revert if you use a very old NAS or printer over the network." }
+[[tweak.cmd]]
+key = "smb1"
+backup = '''
+[string](Get-SmbServerConfiguration -ErrorAction Stop).EnableSMB1Protocol
+'''
+apply = '''
+Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force -ErrorAction Stop
+'''
+verify = '''
+if (-not (Get-SmbServerConfiguration).EnableSMB1Protocol) { 'ok' } else { 'o SMBv1 continua ligado' }
+'''
+revert = '''
+if ($env:NTOSKRNL_BACKUP -eq 'True') { Set-SmbServerConfiguration -EnableSMB1Protocol $true -Force -ErrorAction Stop }
+'''
+
+[[tweak]]
+id = "sec-autorun-off"
+category = "security"
+risk = "safe"
+title = { pt = "Bloquear execução automática de pendrive", en = "Block USB AutoRun" }
+description = { pt = "Pendrives, HDs externos e CDs deixam de executar programas sozinhos ao conectar. Fecha a porta de worms que pulam de pendrive em pendrive.", en = "USB drives, external disks and CDs no longer run programs on their own when plugged in. Stops worms that jump between USB drives." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
+name = "NoDriveTypeAutoRun"
+type = "REG_DWORD"
+value = 255
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
+name = "NoAutorun"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "sec-smartscreen"
+category = "security"
+risk = "safe"
+title = { pt = "SmartScreen ligado", en = "SmartScreen on" }
+description = { pt = "O Windows avisa antes de abrir programas baixados que são desconhecidos ou têm fama de maliciosos.", en = "Windows warns before opening downloaded programs that are unknown or known to be malicious." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer"
+name = "SmartScreenEnabled"
+type = "REG_SZ"
+value = "Warn"
+
+[[tweak]]
+id = "sec-llmnr-off"
+category = "security"
+risk = "safe"
+title = { pt = "Desligar LLMNR", en = "Turn off LLMNR" }
+description = { pt = "Protocolo antigo de descoberta de nomes que permite a outro PC da mesma rede (Wi-Fi público, LAN house) se passar por um servidor e capturar sua senha do Windows.", en = "A legacy name-discovery protocol that lets another PC on the same network (public Wi-Fi, LAN) impersonate a server and capture your Windows password." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient"
+name = "EnableMulticast"
+type = "REG_DWORD"
+value = 0
+
+[[tweak]]
+id = "sec-uac"
+category = "security"
+risk = "safe"
+restart = true
+title = { pt = "Controle de Conta de Usuário (UAC) ativo", en = "User Account Control (UAC) on" }
+description = { pt = "Programas precisam da sua permissão para mudar o sistema, e o pedido aparece na área de trabalho segura, que malware não consegue clicar sozinho.", en = "Programs need your permission to change the system, and the prompt shows on the secure desktop, which malware cannot click by itself." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+name = "EnableLUA"
+type = "REG_DWORD"
+value = 1
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+name = "PromptOnSecureDesktop"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "sec-pua"
+category = "security"
+risk = "safe"
+title = { pt = "Bloquear programas indesejados (PUA)", en = "Block unwanted programs (PUA)" }
+description = { pt = "O Defender passa a barrar adware, mineradores escondidos e instaladores que empurram \"brindes\", comuns em sites de download e cracks.", en = "Defender starts blocking adware, hidden miners and installers that bundle extras, common on download and crack sites." }
+requires = { defender = true }
+[[tweak.cmd]]
+key = "pua"
+backup = '''
+[int](Get-MpPreference -ErrorAction Stop).PUAProtection
+'''
+apply = '''
+Set-MpPreference -PUAProtection Enabled -ErrorAction Stop
+'''
+verify = '''
+if ([int](Get-MpPreference).PUAProtection -eq 1) { 'ok' } else { 'o Defender recusou a mudança (Proteção contra Adulteração ou política da empresa)' }
+'''
+revert = '''
+Set-MpPreference -PUAProtection ([int]$env:NTOSKRNL_BACKUP) -ErrorAction Stop
+'''
+
+[[tweak]]
+id = "sec-ransomware"
+category = "security"
+risk = "moderate"
+title = { pt = "Anti-ransomware: Acesso Controlado a Pastas", en = "Anti-ransomware: Controlled Folder Access" }
+description = { pt = "Documentos, Imagens, Vídeos, Músicas e Área de Trabalho só podem ser alterados por programas confiáveis. Um ransomware não consegue criptografar seus arquivos.", en = "Documents, Pictures, Videos, Music and Desktop can only be changed by trusted programs. Ransomware cannot encrypt your files." }
+warning = { pt = "Alguns jogos salvam em Documentos e podem ser bloqueados na primeira vez. O Windows avisa, e você libera o jogo em Segurança do Windows → Proteção contra ransomware → Permitir um aplicativo.", en = "Some games save to Documents and may be blocked the first time. Windows notifies you, and you allow the game in Windows Security → Ransomware protection → Allow an app." }
+requires = { defender = true }
+[[tweak.cmd]]
+key = "cfa"
+backup = '''
+[int](Get-MpPreference -ErrorAction Stop).EnableControlledFolderAccess
+'''
+apply = '''
+Set-MpPreference -EnableControlledFolderAccess Enabled -ErrorAction Stop
+'''
+verify = '''
+if ([int](Get-MpPreference).EnableControlledFolderAccess -eq 1) { 'ok' } else { 'o Defender recusou a mudança (Proteção contra Adulteração ou política da empresa)' }
+'''
+revert = '''
+Set-MpPreference -EnableControlledFolderAccess ([int]$env:NTOSKRNL_BACKUP) -ErrorAction Stop
+'''
+
+[[tweak]]
+id = "sec-asr"
+category = "security"
+risk = "moderate"
+title = { pt = "Regras de redução de ataque (ASR)", en = "Attack Surface Reduction rules (ASR)" }
+description = { pt = "9 regras do Defender que barram as técnicas mais usadas por malware: macros do Office, scripts ofuscados, roubo de senhas da memória, drivers vulneráveis e programas sem assinatura rodando de pendrive.", en = "9 Defender rules that stop the techniques malware uses most: Office macros, obfuscated scripts, password theft from memory, vulnerable drivers and unsigned programs running from USB." }
+warning = { pt = "Macros de planilhas de trabalho podem ser bloqueadas. Se isso atrapalhar, reverta.", en = "Macros in work spreadsheets may be blocked. Revert if that gets in the way." }
+requires = { defender = true, not_home = true }
+[[tweak.cmd]]
+key = "asr"
+backup = '''
+$p = Get-MpPreference -ErrorAction Stop
+$ids = @($p.AttackSurfaceReductionRules_Ids); $acts = @($p.AttackSurfaceReductionRules_Actions)
+$o = @(); for ($i = 0; $i -lt $ids.Count; $i++) { if ($ids[$i]) { $o += '{0}={1}' -f $ids[$i], [int]$acts[$i] } }
+$o -join ';'
+'''
+apply = '''
+$ids = @('56a863a9-875e-4185-98a7-b882c64b5ce5','9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2','e6db77e5-3df2-4cf1-b95a-636979351e5b','c1db55ab-c21a-4637-bb3f-a12568109d35','be9ba2d9-53ea-4cdc-84e5-9b1eeee46550','d4f940ab-401b-4efc-aadc-ad5f3c50688a','d3e037e1-3eb8-44c8-a917-57927947596d','5beb7efe-fd9a-4556-801d-275e5ffc04cc','b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4')
+Add-MpPreference -AttackSurfaceReductionRules_Ids $ids -AttackSurfaceReductionRules_Actions ($ids | ForEach-Object { 'Enabled' }) -ErrorAction Stop
+'''
+verify = '''
+$p = Get-MpPreference
+$ids = @($p.AttackSurfaceReductionRules_Ids); $acts = @($p.AttackSurfaceReductionRules_Actions)
+$on = @(for ($i = 0; $i -lt $ids.Count; $i++) { if ($acts[$i] -eq 1) { [string]$ids[$i] } })
+if (@(@('56a863a9-875e-4185-98a7-b882c64b5ce5','9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2','e6db77e5-3df2-4cf1-b95a-636979351e5b','c1db55ab-c21a-4637-bb3f-a12568109d35','be9ba2d9-53ea-4cdc-84e5-9b1eeee46550','d4f940ab-401b-4efc-aadc-ad5f3c50688a','d3e037e1-3eb8-44c8-a917-57927947596d','5beb7efe-fd9a-4556-801d-275e5ffc04cc','b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4') | Where-Object { $on -notcontains $_ }).Count) { 'o Defender recusou a mudança (Proteção contra Adulteração ou política da empresa)' } else { 'ok' }
+'''
+revert = '''
+$prev = @{}
+foreach ($x in ($env:NTOSKRNL_BACKUP -split ';')) { if ($x) { $k, $v = $x -split '='; $prev[$k.ToLower()] = [int]$v } }
+foreach ($id in @('56a863a9-875e-4185-98a7-b882c64b5ce5','9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2','e6db77e5-3df2-4cf1-b95a-636979351e5b','c1db55ab-c21a-4637-bb3f-a12568109d35','be9ba2d9-53ea-4cdc-84e5-9b1eeee46550','d4f940ab-401b-4efc-aadc-ad5f3c50688a','d3e037e1-3eb8-44c8-a917-57927947596d','5beb7efe-fd9a-4556-801d-275e5ffc04cc','b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4')) {
+  if ($prev.ContainsKey($id)) { Add-MpPreference -AttackSurfaceReductionRules_Ids $id -AttackSurfaceReductionRules_Actions $prev[$id] -ErrorAction Stop }
+  else { Remove-MpPreference -AttackSurfaceReductionRules_Ids $id -ErrorAction Stop }
+}
+'''
+
+[[tweak]]
+id = "sec-network-protection"
+category = "security"
+risk = "safe"
+title = { pt = "Proteção de Rede", en = "Network Protection" }
+description = { pt = "Bloqueia conexões de qualquer programa (não só do navegador) com sites de phishing, golpes e servidores de controle de malware.", en = "Blocks connections from any program (not just the browser) to phishing, scam and malware command servers." }
+requires = { defender = true, not_home = true }
+[[tweak.cmd]]
+key = "netprot"
+backup = '''
+[int](Get-MpPreference -ErrorAction Stop).EnableNetworkProtection
+'''
+apply = '''
+Set-MpPreference -EnableNetworkProtection Enabled -ErrorAction Stop
+'''
+verify = '''
+if ([int](Get-MpPreference).EnableNetworkProtection -eq 1) { 'ok' } else { 'o Defender recusou a mudança (Proteção contra Adulteração ou política da empresa)' }
+'''
+revert = '''
+Set-MpPreference -EnableNetworkProtection ([int]$env:NTOSKRNL_BACKUP) -ErrorAction Stop
+'''
+
+[[tweak]]
+id = "sec-hvci"
+category = "security"
+risk = "moderate"
+restart = true
+title = { pt = "Anti-rootkit: Integridade de Memória (HVCI)", en = "Anti-rootkit: Memory Integrity (HVCI)" }
+description = { pt = "Usa a virtualização do processador para impedir que drivers e código malicioso se instalem no núcleo do Windows, que é onde os rootkits se escondem.", en = "Uses CPU virtualization to stop malicious drivers and code from loading into the Windows kernel, where rootkits hide." }
+warning = { pt = "Pode reduzir alguns % de FPS em parte dos jogos, e drivers muito antigos impedem a ativação (o Windows avisa). É a troca clássica entre segurança e desempenho: se o FPS cair, reverta.", en = "May cost a few % of FPS in some games, and very old drivers can block it (Windows tells you). It is the classic security vs. performance trade-off: revert if FPS drops." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity"
+name = "Enabled"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "sec-lsa"
+category = "security"
+risk = "safe"
+restart = true
+title = { pt = "Proteção de senhas (LSA protegido)", en = "Password protection (protected LSA)" }
+description = { pt = "O processo que guarda suas credenciais passa a rodar protegido. Programas que tentam ler senhas da memória (Mimikatz e afins) são barrados.", en = "The process that holds your credentials runs protected. Programs that read passwords from memory (Mimikatz and the like) are blocked." }
+[[tweak.reg]]
+path = "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa"
+name = "RunAsPPL"
+type = "REG_DWORD"
+value = 1
+
+[[tweak]]
+id = "sec-wsh-off"
+category = "security"
+risk = "moderate"
+title = { pt = "Desligar Windows Script Host", en = "Turn off Windows Script Host" }
+description = { pt = "Arquivos .vbs e .js deixam de rodar com dois cliques. Esse é o formato preferido de anexos e \"cracks\" que instalam malware.", en = ".vbs and .js files no longer run on double-click. It is the favorite format of malicious attachments and \"cracks\"." }
+warning = { pt = "Alguns instaladores antigos e scripts de trabalho usam .vbs. Se algo parar de funcionar, reverta.", en = "Some old installers and work scripts use .vbs. Revert if something stops working." }
+[[tweak.reg]]
+path = "HKLM\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings"
+name = "Enabled"
+type = "REG_DWORD"
+value = 0
