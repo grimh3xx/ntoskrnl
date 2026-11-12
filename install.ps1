@@ -14,7 +14,10 @@ New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
 Write-Host 'ntoskrnl: baixando...' -ForegroundColor Cyan
 Invoke-WebRequest "$base/ntoskrnl.exe" -OutFile $exe -UseBasicParsing
-$expected = ((Invoke-WebRequest "$base/ntoskrnl.exe.sha256" -UseBasicParsing).Content -split '\s+')[0].Trim().ToLower()
+# no Windows PowerShell 5.1 o .sha256 (application/octet-stream) chega como byte[]
+$raw = (Invoke-WebRequest "$base/ntoskrnl.exe.sha256" -UseBasicParsing).Content
+if ($raw -is [byte[]]) { $raw = [Text.Encoding]::ASCII.GetString($raw) }
+$expected = ($raw.Trim() -split '\s+')[0].ToLower()
 $actual = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
 if ($expected -ne $actual) {
     Remove-Item $exe -Force

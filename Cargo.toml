@@ -1,6 +1,6 @@
 [package]
 name = "ntoskrnl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Windows toolbox for the terminal: tweaks with real undo, app installer, debloat and repairs"
 license = "MIT"
